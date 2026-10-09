@@ -322,13 +322,7 @@
       </div>
 
       <div class="products" id="product-list">
-        <article class="card" data-category="Home" data-name="Storage organiser">
-          <div class="product-art"><span>🧺</span><b class="discount">DEMO</b></div>
-          <div class="card-body">
-            <span class="category-label">Home</span>
-            <h3>Storage Organiser</h3>
-            <div><span class="price">KSh 850</span></div>
-            <a class="btn btn-blue order" href="#contact" data-product="Storage Organiser">Ask about product</a>
+        <p class="empty">Loading ZAVO products...</p>
           </div>
         </article>
 
@@ -396,37 +390,129 @@
   </footer>
 
   <script>
-    const search = document.getElementById('search');
-    const cards = [...document.querySelectorAll('.card')];
-    const chips = [...document.querySelectorAll('.chip')];
-    let category = 'All';
+    const API_URL = "https://YOUR-ACTUAL-WORKER-URL";
 
-    function filterProducts() {
-      const query = search.value.trim().toLowerCase();
-      let visible = 0;
+const search = document.getElementById("search");
+const productList = document.getElementById("product-list");
+const count = document.getElementById("count");
+const chips = [...document.querySelectorAll(".chip")];
 
-      cards.forEach(card => {
-        const matchesCategory = category === 'All' || card.dataset.category === category;
-        const matchesSearch = card.dataset.name.toLowerCase().includes(query);
-        const show = matchesCategory && matchesSearch;
-        card.hidden = !show;
-        if (show) visible++;
-      });
+let products = [];
+let category = "All";
 
-      document.getElementById('count').textContent =
-        visible + (visible === 1 ? ' product' : ' products');
+function formatPrice(amount, currency) {
+  return new Intl.NumberFormat("en-KE", {
+    style: "currency",
+    currency: currency || "KES",
+    maximumFractionDigits: 2
+  }).format(amount / 100);
+}
+
+function renderProducts() {
+  const query = search.value.trim().toLowerCase();
+
+  const filtered = products.filter(product => {
+    const matchesCategory =
+      category === "All" ||
+      product.category.toLowerCase() === category.toLowerCase();
+
+    const matchesSearch =
+      product.title.toLowerCase().includes(query) ||
+      product.description.toLowerCase().includes(query) ||
+      product.category.toLowerCase().includes(query);
+
+    return matchesCategory && matchesSearch;
+  });
+
+  count.textContent =
+    `${filtered.length} ${filtered.length === 1 ? "product" : "products"}`;
+
+  if (filtered.length === 0) {
+    productList.innerHTML =
+      '<p class="empty">No products found in this category.</p>';
+    return;
+  }
+
+  productList.innerHTML = filtered.map(product => `
+    <article class="card">
+      <div class="product-art">
+        <span>🛍️</span>
+      </div>
+      <div class="card-body">
+        <span class="category-label">
+          ${escapeHTML(product.category)}
+        </span>
+        <h3>${escapeHTML(product.title)}</h3>
+        <p>${escapeHTML(product.description)}</p>
+        <div class="price">
+          ${formatPrice(product.price_minor, product.currency)}
+        </div>
+        <p class="sub">In stock: ${product.stock}</p>
+        <button class="btn btn-blue" type="button" disabled>
+          Shopping features coming soon
+        </button>
+      </div>
+    </article>
+  `).join("");
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+async function loadProducts() {
+  productList.innerHTML =
+    '<p class="empty">Loading ZAVO products...</p>';
+
+  try {
+    const response = await fetch(`${API_URL}/api/products`);
+
+    if (!response.ok) {
+      throw new Error("The product API returned an error.");
     }
 
-    chips.forEach(chip => {
-      chip.addEventListener('click', () => {
-        category = chip.dataset.category;
-        chips.forEach(c => c.classList.toggle('active', c === chip));
-        filterProducts();
-      });
+    const data = await response.json();
+
+    if (!data.success || !Array.isArray(data.products)) {
+      throw new Error("The product API response was unexpected.");
+    }
+
+    products = data.products;
+    renderProducts();
+  } catch (error) {
+    console.error("ZAVO product loading error:", error);
+
+    productList.innerHTML =
+      '<p class="empty">We could not load products right now. Please try again later.</p>';
+
+    count.textContent = "Products unavailable";
+  }
+}
+
+chips.forEach(chip => {
+  chip.addEventListener("click", () => {
+    category = chip.dataset.category;
+
+    chips.forEach(item => {
+      item.classList.toggle("active", item === chip);
     });
 
-    search.addEventListener('input', filterProducts);
-    document.getElementById('year').textContent = new Date().getFullYear();
+    renderProducts();
+  });
+});
+
+search.addEventListener("input", renderProducts);
+
+document.getElementById("year").textContent =
+  new Date().getFullYear();
+
+loadProducts();
   </script>
 </body>
 </html>
