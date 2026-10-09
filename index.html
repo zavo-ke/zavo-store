@@ -1,0 +1,432 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#174ea6">
+  <meta name="description" content="Discover great products at competitive prices with ZAVO. Great Deals, Delivered.">
+  <title>ZAVO | Great Deals, Delivered.</title>
+  <style>
+    :root {
+      --blue: #174ea6;
+      --yellow: #ffc928;
+      --ink: #202b3c;
+      --muted: #667085;
+      --bg: #f6f8fc;
+      --white: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.5;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    .topbar {
+      background: var(--blue);
+      color: white;
+      text-align: center;
+      padding: 9px 12px;
+      font-size: 13px;
+    }
+    header {
+      background: white;
+      border-bottom: 1px solid #e7ebf2;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .nav {
+      max-width: 1120px;
+      margin: auto;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .logo {
+      color: var(--blue);
+      font-size: 29px;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+    }
+    .logo span { color: #e0a900; }
+    .search {
+      flex: 1;
+      min-width: 160px;
+      max-width: 440px;
+      padding: 11px 14px;
+      border: 1px solid #d8deea;
+      border-radius: 10px;
+      background: #f8faff;
+      outline-color: var(--blue);
+    }
+    .nav a { font-size: 14px; font-weight: 700; }
+    .hero {
+      background: var(--blue);
+      color: white;
+      padding: 58px 22px;
+      overflow: hidden;
+    }
+    .hero-inner {
+      max-width: 1080px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 30px;
+      align-items: center;
+    }
+    .eyebrow {
+      display: inline-block;
+      background: var(--yellow);
+      color: #19365f;
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+    }
+    h1 {
+      font-size: clamp(38px, 6vw, 64px);
+      line-height: 1.04;
+      letter-spacing: -2px;
+      margin: 18px 0;
+    }
+    .hero p { max-width: 480px; color: #e6eeff; }
+    .btn {
+      display: inline-block;
+      border: 0;
+      border-radius: 10px;
+      padding: 13px 18px;
+      font-weight: 800;
+      text-align: center;
+    }
+    .btn-yellow { background: var(--yellow); color: #17345f; }
+    .btn-blue { background: var(--blue); color: white; }
+    .hero-art {
+      background: #245db0;
+      border: 1px solid #4c7dca;
+      border-radius: 28px;
+      padding: 30px 20px;
+      text-align: center;
+    }
+    .hero-art .bag { font-size: 100px; line-height: 1.3; }
+    .hero-art strong { display: block; font-size: 22px; }
+    .hero-art small { color: #e6eeff; }
+
+    .benefits {
+      max-width: 1080px;
+      margin: -1px auto 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: white;
+      border-bottom: 1px solid #e8edf5;
+    }
+    .benefit { padding: 20px 12px; text-align: center; }
+    .benefit b { display: block; font-size: 14px; }
+    .benefit span { color: var(--muted); font-size: 12px; }
+
+    main { max-width: 1080px; margin: auto; padding: 38px 20px 60px; }
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    h2 { margin: 0; font-size: 27px; letter-spacing: -.7px; }
+    .sub { margin: 5px 0 0; color: var(--muted); font-size: 14px; }
+    .categories {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+      margin: 22px 0;
+    }
+    .chip {
+      border: 1px solid #dce3ef;
+      border-radius: 30px;
+      padding: 9px 15px;
+      background: white;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .chip.active, .chip:hover {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: white;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 17px;
+    }
+    .card {
+      background: white;
+      border: 1px solid #e8ecf3;
+      border-radius: 15px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      box-shadow: 0 3px 12px #18345b08;
+    }
+    .product-art {
+      min-height: 155px;
+      background: #edf3ff;
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+    .product-art span { font-size: 65px; }
+    .discount {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      border-radius: 6px;
+      background: var(--yellow);
+      color: #23364f;
+      padding: 4px 7px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .card-body {
+      padding: 13px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .category-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .card h3 { font-size: 15px; margin: 5px 0 8px; }
+    .price { font-size: 19px; font-weight: 900; color: var(--blue); }
+    .old-price { color: #858c99; font-size: 12px; text-decoration: line-through; margin-left: 5px; }
+    .card .btn { margin-top: 13px; font-size: 13px; width: 100%; }
+    .empty { grid-column: 1/-1; text-align: center; padding: 30px; color: var(--muted); }
+
+    .notice {
+      margin-top: 30px;
+      padding: 18px;
+      border-radius: 13px;
+      background: #fff6d7;
+      color: #5d4b17;
+      font-size: 13px;
+    }
+    .about {
+      margin-top: 35px;
+      background: white;
+      padding: 27px;
+      border-radius: 18px;
+      border: 1px solid #e8ecf3;
+    }
+    .about p { color: var(--muted); max-width: 700px; }
+    footer {
+      background: #132f60;
+      color: white;
+      padding: 32px 20px;
+    }
+    .footer-inner {
+      max-width: 1080px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    footer p, footer a { color: #dce7ff; font-size: 13px; }
+    .footer-logo { color: white; font-size: 24px; font-weight: 900; }
+    .footer-logo span { color: var(--yellow); }
+
+    @media (max-width: 760px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero { padding: 42px 20px; }
+      .hero-art { display: none; }
+      .products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .product-art { min-height: 125px; }
+      .product-art span { font-size: 52px; }
+      .benefit { padding: 15px 5px; }
+      .benefit b { font-size: 12px; }
+      .benefit span { font-size: 10px; }
+      .nav { gap: 12px; }
+      .search { order: 3; max-width: none; flex-basis: 100%; }
+      h1 { letter-spacing: -1px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">Welcome to ZAVO · Great Deals, Delivered.</div>
+
+  <header>
+    <nav class="nav">
+      <a class="logo" href="#" aria-label="ZAVO home">ZA<span>V</span>O</a>
+      <input id="search" class="search" type="search"
+        placeholder="Search products..." aria-label="Search products">
+      <a href="#products">Shop now ↓</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <span class="eyebrow">Your next great find</span>
+        <h1>Great deals.<br>Better everyday.</h1>
+        <p>Discover useful finds for your home, style and everyday life — all in one place.</p>
+        <a class="btn btn-yellow" href="#products">Explore products →</a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="bag">🛍️</div>
+        <strong>More value, less fuss.</strong>
+        <small>Your shopping journey starts here.</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="benefits" aria-label="Shopping benefits">
+    <div class="benefit"><b>🏷️ Great-value finds</b><span>Discover competitive prices</span></div>
+    <div class="benefit"><b>📦 Supplier-direct</b><span>Products sent by our suppliers</span></div>
+    <div class="benefit"><b>💬 Personal support</b><span>Help when you need it</span></div>
+  </section>
+
+  <main>
+    <section id="products">
+      <div class="section-head">
+        <div>
+          <h2>Explore our finds</h2>
+          <p class="sub">A little something for everyday life.</p>
+        </div>
+        <span class="sub" id="count">4 products</span>
+      </div>
+
+      <div class="categories" id="categories" aria-label="Filter products">
+        <button class="chip active" data-category="All">All products</button>
+        <button class="chip" data-category="Home">Home</button>
+        <button class="chip" data-category="Fashion">Fashion</button>
+        <button class="chip" data-category="Beauty">Beauty</button>
+        <button class="chip" data-category="Tech">Tech</button>
+      </div>
+
+      <div class="products" id="product-list">
+        <article class="card" data-category="Home" data-name="Storage organiser">
+          <div class="product-art"><span>🧺</span><b class="discount">DEMO</b></div>
+          <div class="card-body">
+            <span class="category-label">Home</span>
+            <h3>Storage Organiser</h3>
+            <div><span class="price">KSh 850</span></div>
+            <a class="btn btn-blue order" href="#contact" data-product="Storage Organiser">Ask about product</a>
+          </div>
+        </article>
+
+        <article class="card" data-category="Fashion" data-name="Everyday backpack">
+          <div class="product-art"><span>🎒</span><b class="discount">DEMO</b></div>
+          <div class="card-body">
+            <span class="category-label">Fashion</span>
+            <h3>Everyday Backpack</h3>
+            <div><span class="price">KSh 1,200</span></div>
+            <a class="btn btn-blue order" href="#contact" data-product="Everyday Backpack">Ask about product</a>
+          </div>
+        </article>
+
+        <article class="card" data-category="Beauty" data-name="Beauty essentials kit">
+          <div class="product-art"><span>🧴</span><b class="discount">DEMO</b></div>
+          <div class="card-body">
+            <span class="category-label">Beauty</span>
+            <h3>Beauty Essentials Kit</h3>
+            <div><span class="price">KSh 950</span></div>
+            <a class="btn btn-blue order" href="#contact" data-product="Beauty Essentials Kit">Ask about product</a>
+          </div>
+        </article>
+
+        <article class="card" data-category="Tech" data-name="Wireless headphones">
+          <div class="product-art"><span>🎧</span><b class="discount">DEMO</b></div>
+          <div class="card-body">
+            <span class="category-label">Tech</span>
+            <h3>Wireless Headphones</h3>
+            <div><span class="price">KSh 1,500</span></div>
+            <a class="btn btn-blue order" href="#contact" data-product="Wireless Headphones">Ask about product</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="notice">
+        <strong>Demo catalogue:</strong> These are sample products and illustrative prices, not verified offers.
+        Replace them with confirmed supplier products, real images, accurate prices and delivery terms before accepting orders.
+      </div>
+    </section>
+
+    <section class="about" id="about">
+      <h2>A smarter way to discover products</h2>
+      <p>ZAVO is being built to help shoppers discover useful products at competitive prices, with clear information and friendly support. We're starting in Kenya, with the ambition to serve more African markets.</p>
+    </section>
+
+    <section class="about" id="contact">
+      <h2>Interested in a product?</h2>
+      <p>Our order service is being set up. Contact details will be added here once your business number and order process are ready.</p>
+      <p><strong>Coming next:</strong> product enquiries, order confirmation and delivery arrangements.</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">ZA<span>V</span>O</div>
+        <p>Great Deals, Delivered.</p>
+      </div>
+      <div>
+        <a href="#about">About ZAVO</a><br>
+        <a href="#contact">Contact & orders</a>
+        <p>© <span id="year"></span> ZAVO. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const search = document.getElementById('search');
+    const cards = [...document.querySelectorAll('.card')];
+    const chips = [...document.querySelectorAll('.chip')];
+    let category = 'All';
+
+    function filterProducts() {
+      const query = search.value.trim().toLowerCase();
+      let visible = 0;
+
+      cards.forEach(card => {
+        const matchesCategory = category === 'All' || card.dataset.category === category;
+        const matchesSearch = card.dataset.name.toLowerCase().includes(query);
+        const show = matchesCategory && matchesSearch;
+        card.hidden = !show;
+        if (show) visible++;
+      });
+
+      document.getElementById('count').textContent =
+        visible + (visible === 1 ? ' product' : ' products');
+    }
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        category = chip.dataset.category;
+        chips.forEach(c => c.classList.toggle('active', c === chip));
+        filterProducts();
+      });
+    });
+
+    search.addEventListener('input', filterProducts);
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
