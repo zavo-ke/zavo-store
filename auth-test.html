@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ZAVO Authentication Test</title>
+  <style>
+    :root {
+      --blue: #174EA6;
+      --yellow: #FFC928;
+      --dark: #202B3C;
+      --light: #f3f6fb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      color: var(--dark);
+      background: var(--light);
+    }
+    main {
+      max-width: 520px;
+      margin: 20px auto;
+      padding: 24px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 18px #00000012;
+    }
+    header {
+      padding-bottom: 16px;
+      border-bottom: 3px solid var(--yellow);
+      margin-bottom: 20px;
+    }
+    .brand {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--blue);
+      letter-spacing: 1px;
+    }
+    h1 { font-size: 23px; margin-bottom: 8px; }
+    p { line-height: 1.5; }
+    label {
+      display: block;
+      font-weight: 700;
+      margin: 14px 0 6px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    button {
+      padding: 12px 8px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--blue);
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button.secondary { background: var(--dark); }
+    button.yellow { background: var(--yellow); color: var(--dark); }
+    button:disabled { opacity: .5; cursor: wait; }
+    #result {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 8px;
+      background: #eef2f7;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: 14px;
+      min-height: 60px;
+    }
+    .warning {
+      color: #8a3412;
+      background: #fff7ed;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="brand">ZAVO</div>
+    <p>Great Deals, Delivered.</p>
+  </header>
+
+  <h1>Authentication Test</h1>
+  <p>Use this page to test registration, login, account access and logout.</p>
+
+  <p class="warning">
+    Development testing only. Do not use your real password or payment details.
+  </p>
+
+  <label for="fullName">Full name</label>
+  <input id="fullName" autocomplete="name" placeholder="Test Customer">
+
+  <label for="email">Email address</label>
+  <input id="email" type="email" autocomplete="email"
+         placeholder="Enter a test email address">
+
+  <label for="password">Test password</label>
+  <input id="password" type="password" autocomplete="new-password"
+         placeholder="At least 12 characters">
+
+  <div class="buttons">
+    <button id="register">Register</button>
+    <button id="login">Log In</button>
+    <button id="check" class="yellow">Check Account</button>
+    <button id="logout" class="secondary">Log Out</button>
+  </div>
+
+  <h2>Result</h2>
+  <div id="result" role="status" aria-live="polite">
+    Ready. Enter test details and choose an action.
+  </div>
+</main>
+
+<script>
+(() => {
+  const API_BASE = "https://zavo-auth-dev.owinosylvester2025.workers.dev";
+
+  const result = document.getElementById("result");
+  const buttons = [...document.querySelectorAll("button")];
+  let sessionToken = "";
+
+  function show(value) {
+    result.textContent = typeof value === "string"
+      ? value
+      : JSON.stringify(value, null, 2);
+  }
+
+  async function request(path, options = {}) {
+    const headers = { "Content-Type": "application/json" };
+
+    if (sessionToken) {
+      headers.Authorization = "Bearer " + sessionToken;
+    }
+
+    const response = await fetch(API_BASE + path, {
+      ...options,
+      headers: { ...headers, ...(options.headers || {}) }
+    });
+
+    const data = await response.json().catch(() => ({
+      error: "The server did not return valid JSON."
+    }));
+
+    if (!response.ok) {
+      throw new Error(data.error || "Request failed: " + response.status);
+    }
+
+    return data;
+  }
+
+  async function run(action) {
+    buttons.forEach(button => button.disabled = true);
+    show("Working...");
+
+    try {
+      await action();
+    } catch (error) {
+      show("Error: " + error.message);
+    } finally {
+      buttons.forEach(button => button.disabled = false);
+    }
+  }
+
+  document.getElementById("register").addEventListener("click", () =>
+    run(async () => {
+      const data = await request("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify({
+          full_name: document.getElementById("fullName").value.trim(),
+          email: document.getElementById("email").value.trim(),
+          password: document.getElementById("password").value
+        })
+      });
+      show(data);
+    })
+  );
+
+  document.getElementById("login").addEventListener("click", () =>
+    run(async () => {
+      const data = await request("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({
+          email: document.getElementById("email").value.trim(),
+          password: document.getElementById("password").value
+        })
+      });
+
+      sessionToken = data.token || "";
+      show({
+        success: data.success,
+        message: "Login completed. Keep this token private.",
+        user: data.user,
+        expires_at: data.expires_at
+      });
+    })
+  );
+
+  document.getElementById("check").addEventListener("click", () =>
+    run(async () => {
+      const data = await request("/api/auth/me");
+      show(data);
+    })
+  );
+
+  document.getElementById("logout").addEventListener("click", () =>
+    run(async () => {
+      const data = await request("/api/auth/logout", {
+        method: "POST"
+      });
+      sessionToken = "";
+      show(data);
+    })
+  );
+})();
+</script>
+</body>
+</html>
