@@ -310,7 +310,7 @@
           <h2>Explore our finds</h2>
           <p class="sub">A little something for everyday life.</p>
         </div>
-        <span class="sub" id="count">4 products</span>
+        <span class="sub" id="count">Loading products...</span>
       </div>
 
       <div class="categories" id="categories" aria-label="Filter products">
@@ -380,14 +380,18 @@ function renderProducts() {
   const query = search.value.trim().toLowerCase();
 
   const filtered = products.filter(product => {
+    const title = String(product.title ?? "");
+    const description = String(product.description ?? "");
+    const productCategory = String(product.category ?? "");
+
     const matchesCategory =
       category === "All" ||
-      product.category.toLowerCase() === category.toLowerCase();
+      productCategory.toLowerCase() === category.toLowerCase();
 
     const matchesSearch =
-      product.title.toLowerCase().includes(query) ||
-      product.description.toLowerCase().includes(query) ||
-      product.category.toLowerCase().includes(query);
+      title.toLowerCase().includes(query) ||
+      description.toLowerCase().includes(query) ||
+      productCategory.toLowerCase().includes(query);
 
     return matchesCategory && matchesSearch;
   });
@@ -415,7 +419,7 @@ function renderProducts() {
         <div class="price">
           ${formatPrice(product.price_minor, product.currency)}
         </div>
-        <p class="sub">In stock: ${product.stock}</p>
+        <p class="sub">In stock: ${Number(product.stock) || 0}</p>
         <button class="btn btn-blue" type="button" disabled>
           Shopping features coming soon
         </button>
