@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,304 +6,97 @@
   <meta name="description" content="Discover great products at competitive prices with ZAVO. Great Deals, Delivered.">
   <title>ZAVO | Great Deals, Delivered.</title>
   <style>
-    :root {
-      --blue: #174ea6;
-      --yellow: #ffc928;
-      --ink: #202b3c;
-      --muted: #667085;
-      --bg: #f6f8fc;
-      --white: #ffffff;
-    }
-
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      color: var(--ink);
-      background: var(--bg);
-      line-height: 1.5;
-    }
-    a { color: inherit; text-decoration: none; }
-    button, input { font: inherit; }
-    button { cursor: pointer; }
-
-    .topbar {
-      background: var(--blue);
-      color: white;
-      text-align: center;
-      padding: 9px 12px;
-      font-size: 13px;
-    }
-    header {
-      background: white;
-      border-bottom: 1px solid #e7ebf2;
-      position: sticky;
-      top: 0;
-      z-index: 5;
-    }
-    .nav {
-      max-width: 1120px;
-      margin: auto;
-      padding: 15px 20px;
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-    .logo {
-      color: var(--blue);
-      font-size: 29px;
-      font-weight: 900;
-      letter-spacing: -1.5px;
-    }
-    .logo span { color: #e0a900; }
-    .search {
-      flex: 1;
-      min-width: 160px;
-      max-width: 440px;
-      padding: 11px 14px;
-      border: 1px solid #d8deea;
-      border-radius: 10px;
-      background: #f8faff;
-      outline-color: var(--blue);
-    }
-    .nav a { font-size: 14px; font-weight: 700; }
-
-    .hero {
-      background: var(--blue);
-      color: white;
-      padding: 58px 22px;
-      overflow: hidden;
-    }
-    .hero-inner {
-      max-width: 1080px;
-      margin: auto;
-      display: grid;
-      grid-template-columns: 1.3fr 0.7fr;
-      gap: 30px;
-      align-items: center;
-    }
-    .eyebrow {
-      display: inline-block;
-      background: var(--yellow);
-      color: #19365f;
-      padding: 6px 12px;
-      border-radius: 30px;
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .6px;
-    }
-    h1 {
-      font-size: clamp(38px, 6vw, 64px);
-      line-height: 1.04;
-      letter-spacing: -2px;
-      margin: 18px 0;
-    }
-    .hero p { max-width: 480px; color: #e6eeff; }
-    .btn {
-      display: inline-block;
-      border: 0;
-      border-radius: 10px;
-      padding: 13px 18px;
-      font-weight: 800;
-      text-align: center;
-    }
-    .btn-yellow { background: var(--yellow); color: #17345f; }
-    .btn-blue { background: var(--blue); color: white; }
-    .hero-art {
-      background: #245db0;
-      border: 1px solid #4c7dca;
-      border-radius: 28px;
-      padding: 30px 20px;
-      text-align: center;
-    }
-    .hero-art .bag { font-size: 100px; line-height: 1.3; }
-    .hero-art strong { display: block; font-size: 22px; }
-    .hero-art small { color: #e6eeff; }
-
-    .benefits {
-      max-width: 1080px;
-      margin: -1px auto 0;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      background: white;
-      border-bottom: 1px solid #e8edf5;
-    }
-    .benefit { padding: 20px 12px; text-align: center; }
-    .benefit b { display: block; font-size: 14px; }
-    .benefit span { color: var(--muted); font-size: 12px; }
-
-    main { max-width: 1080px; margin: auto; padding: 38px 20px 60px; }
-    .section-head {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    h2 { margin: 0; font-size: 27px; letter-spacing: -.7px; }
-    .sub { margin: 5px 0 0; color: var(--muted); font-size: 14px; }
-
-    .categories {
-      display: flex;
-      gap: 9px;
-      flex-wrap: wrap;
-      margin: 22px 0;
-    }
-    .chip {
-      border: 1px solid #dce3ef;
-      border-radius: 30px;
-      padding: 9px 15px;
-      background: white;
-      color: var(--ink);
-      font-size: 13px;
-      font-weight: 700;
-    }
-    .chip.active, .chip:hover {
-      background: var(--blue);
-      border-color: var(--blue);
-      color: white;
-    }
-
-    .products {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 17px;
-    }
-    .card {
-      background: white;
-      border: 1px solid #e8ecf3;
-      border-radius: 15px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      box-shadow: 0 3px 12px #18345b08;
-    }
-    .product-art {
-      min-height: 155px;
-      height: 180px;
-      background: #edf3ff;
-      display: grid;
-      place-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .product-art .fallback-icon {
-      font-size: 65px;
-    }
-    .product-art img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background: #fff;
-    }
-    .discount {
-      position: absolute;
-      left: 10px;
-      top: 10px;
-      z-index: 1;
-      border-radius: 6px;
-      background: var(--yellow);
-      color: #23364f;
-      padding: 4px 7px;
-      font-size: 11px;
-      font-weight: 900;
-    }
-    .card-body {
-      padding: 13px;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-    }
-    .category-label {
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
-    .card h3 { font-size: 15px; margin: 5px 0 8px; }
-    .card-description { font-size: 13px; color: var(--muted); }
-    .price { font-size: 19px; font-weight: 900; color: var(--blue); }
-    .old-price {
-      color: #858c99;
-      font-size: 12px;
-      text-decoration: line-through;
-      margin-left: 5px;
-    }
-    .card .btn { margin-top: 13px; font-size: 13px; width: 100%; }
-    .card button:disabled { opacity: .72; cursor: not-allowed; }
-    .empty { grid-column: 1/-1; text-align: center; padding: 30px; color: var(--muted); }
-
-    .notice {
-      margin-top: 30px;
-      padding: 18px;
-      border-radius: 13px;
-      background: #fff6d7;
-      color: #5d4b17;
-      font-size: 13px;
-    }
-    .about {
-      margin-top: 35px;
-      background: white;
-      padding: 27px;
-      border-radius: 18px;
-      border: 1px solid #e8ecf3;
-    }
-    .about p { color: var(--muted); max-width: 700px; }
-
-    footer {
-      background: #132f60;
-      color: white;
-      padding: 32px 20px;
-    }
-    .footer-inner {
-      max-width: 1080px;
-      margin: auto;
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-    footer p, footer a { color: #dce7ff; font-size: 13px; }
-    .footer-logo { color: white; font-size: 24px; font-weight: 900; }
-    .footer-logo span { color: var(--yellow); }
-
-    @media (max-width: 760px) {
-      .hero-inner { grid-template-columns: 1fr; }
-      .hero { padding: 42px 20px; }
-      .hero-art { display: none; }
-      .products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-      .product-art { min-height: 125px; height: 150px; }
-      .product-art .fallback-icon { font-size: 52px; }
-      .benefit { padding: 15px 5px; }
-      .benefit b { font-size: 12px; }
-      .benefit span { font-size: 10px; }
-      .nav { gap: 12px; }
-      .search { order: 3; max-width: none; flex-basis: 100%; }
-      h1 { letter-spacing: -1px; }
+    :root{--blue:#174ea6;--yellow:#ffc928;--ink:#202b3c;--muted:#667085;--bg:#f6f8fc;--white:#fff}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5}
+    a{color:inherit;text-decoration:none}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .topbar{background:var(--blue);color:#fff;text-align:center;padding:9px 12px;font-size:13px}
+    header{background:#fff;border-bottom:1px solid #e7ebf2;position:sticky;top:0;z-index:5}
+    .nav{max-width:1120px;margin:auto;padding:15px 20px;display:flex;align-items:center;gap:18px;justify-content:space-between;flex-wrap:wrap}
+    .logo{color:var(--blue);font-size:29px;font-weight:900;letter-spacing:-1.5px}
+    .logo span{color:#e0a900}
+    .search{flex:1;min-width:160px;max-width:440px;padding:11px 14px;border:1px solid #d8deea;border-radius:10px;background:#f8faff;outline-color:var(--blue)}
+    .nav a{font-size:14px;font-weight:700}
+    .hero{background:var(--blue);color:#fff;padding:58px 22px;overflow:hidden}
+    .hero-inner{max-width:1080px;margin:auto;display:grid;grid-template-columns:1.3fr .7fr;gap:30px;align-items:center}
+    .eyebrow{display:inline-block;background:var(--yellow);color:#19365f;padding:6px 12px;border-radius:30px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+    h1{font-size:clamp(38px,6vw,64px);line-height:1.04;letter-spacing:-2px;margin:18px 0}
+    .hero p{max-width:480px;color:#e6eeff}
+    .btn{display:inline-block;border:0;border-radius:10px;padding:13px 18px;font-weight:800;text-align:center}
+    .btn-yellow{background:var(--yellow);color:#17345f}
+    .btn-blue{background:var(--blue);color:#fff}
+    .hero-art{background:#245db0;border:1px solid #4c7dca;border-radius:28px;padding:30px 20px;text-align:center}
+    .hero-art .bag{font-size:100px;line-height:1.3}
+    .hero-art strong{display:block;font-size:22px}
+    .hero-art small{color:#e6eeff}
+    .benefits{max-width:1080px;margin:-1px auto 0;display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-bottom:1px solid #e8edf5}
+    .benefit{padding:20px 12px;text-align:center}
+    .benefit b{display:block;font-size:14px}
+    .benefit span{color:var(--muted);font-size:12px}
+    main{max-width:1080px;margin:auto;padding:38px 20px 60px}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+    h2{margin:0;font-size:27px;letter-spacing:-.7px}
+    .sub{margin:5px 0 0;color:var(--muted);font-size:14px}
+    .categories{display:flex;gap:9px;flex-wrap:wrap;margin:22px 0}
+    .chip{border:1px solid #dce3ef;border-radius:30px;padding:9px 15px;background:#fff;color:var(--ink);font-size:13px;font-weight:700}
+    .chip.active,.chip:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+    .products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:17px}
+    .card{background:#fff;border:1px solid #e8ecf3;border-radius:15px;overflow:hidden;display:flex;flex-direction:column;min-width:0;box-shadow:0 3px 12px #18345b08}
+    .product-art{min-height:155px;height:180px;background:#edf3ff;display:grid;place-items:center;position:relative;overflow:hidden}
+    .fallback-icon{font-size:65px}
+    .product-art img,.product-art video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
+    .media-controls{display:flex;gap:7px;overflow-x:auto;padding:9px 12px 0}
+    .media-thumb{flex:0 0 48px;width:48px;height:48px;border:1px solid #dce3ef;border-radius:8px;padding:0;background:#fff;overflow:hidden}
+    .media-thumb img{width:100%;height:100%;object-fit:cover}
+    .media-thumb.active{border:2px solid var(--blue)}
+    .media-thumb span{display:grid;place-items:center;height:100%;font-size:20px}
+    .card-body{padding:13px;display:flex;flex-direction:column;flex:1}
+    .category-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+    .card h3{font-size:15px;margin:5px 0 8px}
+    .card-description{font-size:13px;color:var(--muted);margin:0 0 8px}
+    .price{font-size:19px;font-weight:900;color:var(--blue)}
+    .meta-line{font-size:12px;color:var(--muted);margin:7px 0 0}
+    .rating{font-size:13px;margin:2px 0 8px;color:#7b5900}
+    .review{border-left:3px solid var(--yellow);padding-left:9px;margin:8px 0 0;font-size:12px;color:var(--muted)}
+    .card .btn{margin-top:13px;font-size:13px;width:100%}
+    .card button:disabled{opacity:.72;cursor:not-allowed}
+    .empty{grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)}
+    .notice{margin-top:30px;padding:18px;border-radius:13px;background:#fff6d7;color:#5d4b17;font-size:13px}
+    .about{margin-top:35px;background:#fff;padding:27px;border-radius:18px;border:1px solid #e8ecf3}
+    .about p{color:var(--muted);max-width:700px}
+    footer{background:#132f60;color:#fff;padding:32px 20px}
+    .footer-inner{max-width:1080px;margin:auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px}
+    footer p,footer a{color:#dce7ff;font-size:13px}
+    .footer-logo{color:#fff;font-size:24px;font-weight:900}
+    .footer-logo span{color:var(--yellow)}
+    @media(max-width:900px){.products{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:760px){
+      .hero-inner{grid-template-columns:1fr}
+      .hero{padding:42px 20px}
+      .hero-art{display:none}
+      .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+      .product-art{min-height:125px;height:150px}
+      .fallback-icon{font-size:52px}
+      .benefit{padding:15px 5px}
+      .benefit b{font-size:12px}
+      .benefit span{font-size:10px}
+      .nav{gap:12px}
+      .search{order:3;max-width:none;flex-basis:100%}
+      h1{letter-spacing:-1px}
     }
   </style>
 </head>
 <body>
-  <div class="topbar">Welcome to ZAVO · Great Deals, Delivered.</div>
-
-  <header>
+  <div class="topbar">Welcome to ZAVO · Great Deals, Delivered.</div>  <header>
     <nav class="nav">
       <a class="logo" href="#" aria-label="ZAVO home">ZA<span>V</span>O</a>
-      <input id="search" class="search" type="search"
-        placeholder="Search products..." aria-label="Search products">
+      <input id="search" class="search" type="search" placeholder="Search products..." aria-label="Search products">
       <a href="#products">Shop now ↓</a>
     </nav>
-  </header>
-
-  <section class="hero">
+  </header>  <section class="hero">
     <div class="hero-inner">
       <div>
         <span class="eyebrow">Your next great find</span>
@@ -318,15 +110,11 @@
         <small>Your shopping journey starts here.</small>
       </div>
     </div>
-  </section>
-
-  <section class="benefits" aria-label="Shopping benefits">
+  </section>  <section class="benefits" aria-label="Shopping benefits">
     <div class="benefit"><b>🏷️ Great-value finds</b><span>Discover competitive prices</span></div>
     <div class="benefit"><b>📦 Supplier-direct</b><span>Products sent by our suppliers</span></div>
     <div class="benefit"><b>💬 Personal support</b><span>Help when you need it</span></div>
-  </section>
-
-  <main>
+  </section>  <main>
     <section id="products">
       <div class="section-head">
         <div>
@@ -334,41 +122,36 @@
           <p class="sub">A little something for everyday life.</p>
         </div>
         <span class="sub" id="count">Loading products...</span>
-      </div>
+      </div>  <div class="categories" id="categories" aria-label="Filter products">
+    <button class="chip active" data-category="All">All products</button>
+    <button class="chip" data-category="Home">Home</button>
+    <button class="chip" data-category="Fashion">Fashion</button>
+    <button class="chip" data-category="Beauty">Beauty</button>
+    <button class="chip" data-category="Tech">Tech</button>
+    <button class="chip" data-category="General">General</button>
+  </div>
 
-      <div class="categories" id="categories" aria-label="Filter products">
-        <button class="chip active" data-category="All">All products</button>
-        <button class="chip" data-category="Home">Home</button>
-        <button class="chip" data-category="Fashion">Fashion</button>
-        <button class="chip" data-category="Beauty">Beauty</button>
-        <button class="chip" data-category="Tech">Tech</button>
-        <button class="chip" data-category="General">General</button>
-      </div>
+  <div class="products" id="product-list">
+    <p class="empty">Loading ZAVO products...</p>
+  </div>
 
-      <div class="products" id="product-list">
-        <p class="empty">Loading ZAVO products...</p>
-      </div>
+  <div class="notice">
+    <strong>Demo catalogue:</strong> Sample products and illustrative prices are not verified offers. Replace them with confirmed supplier products, real images, accurate prices and delivery terms before accepting orders.
+  </div>
+</section>
 
-      <div class="notice">
-        <strong>Demo catalogue:</strong> Sample products and illustrative prices are not verified offers.
-        Replace them with confirmed supplier products, real images, accurate prices and delivery terms
-        before accepting orders.
-      </div>
-    </section>
+<section class="about" id="about">
+  <h2>A smarter way to discover products</h2>
+  <p>ZAVO is being built to help shoppers discover useful products at competitive prices, with clear information and friendly support. We're starting in Kenya, with the ambition to serve more African markets.</p>
+</section>
 
-    <section class="about" id="about">
-      <h2>A smarter way to discover products</h2>
-      <p>ZAVO is being built to help shoppers discover useful products at competitive prices, with clear information and friendly support. We're starting in Kenya, with the ambition to serve more African markets.</p>
-    </section>
+<section class="about" id="contact">
+  <h2>Interested in a product?</h2>
+  <p>Our order service is being set up. Contact details will be added here once your business number and order process are ready.</p>
+  <p><strong>Coming next:</strong> product enquiries, order confirmation and delivery arrangements.</p>
+</section>
 
-    <section class="about" id="contact">
-      <h2>Interested in a product?</h2>
-      <p>Our order service is being set up. Contact details will be added here once your business number and order process are ready.</p>
-      <p><strong>Coming next:</strong> product enquiries, order confirmation and delivery arrangements.</p>
-    </section>
-  </main>
-
-  <footer>
+  </main>  <footer>
     <div class="footer-inner">
       <div>
         <div class="footer-logo">ZA<span>V</span>O</div>
@@ -380,11 +163,8 @@
         <p>© <span id="year"></span> ZAVO. All rights reserved.</p>
       </div>
     </div>
-  </footer>
-
-  <script>
+  </footer>  <script>
     const API_URL = "https://zavo-api.owinosylvester2025.workers.dev";
-
     const search = document.getElementById("search");
     const productList = document.getElementById("product-list");
     const count = document.getElementById("count");
@@ -415,22 +195,153 @@
         ">": "&gt;",
         '"': "&quot;",
         "'": "&#39;"
-      })[char]);
+      }[char]));
     }
 
-    function getSafeImageURL(value) {
+    function getSafeMediaURL(value) {
       if (typeof value !== "string" || !value.trim()) return "";
 
       try {
         const url = new URL(value);
-        if (url.protocol === "https:" || url.protocol === "http:") {
-          return url.href;
-        }
+        return url.protocol === "https:" || url.protocol === "http:"
+          ? url.href
+          : "";
       } catch {
         return "";
       }
+    }
 
-      return "";
+    function normalizeMedia(product) {
+      const media = [];
+      const images = Array.isArray(product.images) ? product.images : [];
+      const videos = Array.isArray(product.videos) ? product.videos : [];
+
+      images.forEach(value => {
+        const url = getSafeMediaURL(value);
+        if (url) media.push({ type: "image", url });
+      });
+
+      videos.forEach(value => {
+        const url = getSafeMediaURL(value);
+        if (url) media.push({ type: "video", url });
+      });
+
+      if (!media.length) {
+        const fallback = getSafeMediaURL(product.image_url);
+        if (fallback) media.push({ type: "image", url: fallback });
+      }
+
+      return media;
+    }
+
+    function renderOptionalList(label, value) {
+      let values = [];
+
+      if (Array.isArray(value)) {
+        values = value.map(v => String(v ?? "").trim()).filter(Boolean);
+      } else if (typeof value === "string" && value.trim()) {
+        values = value.split(",").map(v => v.trim()).filter(Boolean);
+      }
+
+      if (!values.length) return "";
+
+      return `<p class="meta-line"><strong>${escapeHTML(label)}:</strong> ${values.map(escapeHTML).join(", ")}</p>`;
+    }
+
+    function renderRating(product) {
+      const rawRating = product.rating ?? product.average_rating;
+      const rating = Number(rawRating);
+
+      const hasRating =
+        rawRating !== null &&
+        rawRating !== undefined &&
+        String(rawRating).trim() !== "" &&
+        Number.isFinite(rating) &&
+        rating >= 0 &&
+        rating <= 5;
+
+      const review = String(product.review_text ?? product.review ?? "").trim();
+      let markup = "";
+
+      if (hasRating) {
+        markup += `<p class="rating" aria-label="Rating ${rating} out of 5">★ ${Math.round(rating * 10) / 10}/5</p>`;
+      }
+
+      if (review) {
+        markup += `<p class="review">${escapeHTML(review)}</p>`;
+      }
+
+      return markup;
+    }
+
+    function renderMedia(product, index) {
+      const media = normalizeMedia(product);
+      const title = escapeHTML(product.title || "Product");
+
+      let main = `<span class="fallback-icon" aria-label="Product image unavailable">🛍️</span>`;
+
+      if (media[0]) {
+        main = media[0].type === "image"
+          ? `<img class="main-media" src="${escapeHTML(media[0].url)}" alt="${title}" loading="lazy">`
+          : `<video class="main-media" src="${escapeHTML(media[0].url)}" controls preload="metadata" aria-label="${title} video"></video>`;
+      }
+
+      const thumbs = media.length > 1
+        ? `<div class="media-controls" aria-label="More product media">${media.map((item, i) => `
+          <button class="media-thumb ${i === 0 ? "active" : ""}" type="button" data-product-index="${index}" data-media-index="${i}" aria-label="Show ${item.type} ${i + 1}">
+            ${item.type === "image"
+              ? `<img src="${escapeHTML(item.url)}" alt="" loading="lazy">`
+              : '<span aria-hidden="true">▶</span>'}
+          </button>`).join("")}</div>`
+        : "";
+
+      return `<div class="product-art">${main}</div>${thumbs}`;
+    }
+
+    function attachMediaHandlers(filtered) {
+      productList.querySelectorAll(".main-media").forEach(el => {
+        el.addEventListener("error", () => {
+          const art = el.closest(".product-art");
+          if (!art) return;
+
+          el.remove();
+
+          if (!art.querySelector(".fallback-icon")) {
+            const fallback = document.createElement("span");
+            fallback.className = "fallback-icon";
+            fallback.textContent = "🛍️";
+            fallback.setAttribute("aria-label", "Product media unavailable");
+            art.appendChild(fallback);
+          }
+        }, { once: true });
+      });
+
+      productList.querySelectorAll(".media-thumb").forEach(button => {
+        button.addEventListener("click", () => {
+          const product = filtered[Number(button.dataset.productIndex)];
+          const selected = normalizeMedia(product)[Number(button.dataset.mediaIndex)];
+          const card = button.closest(".card");
+          const art = card?.querySelector(".product-art");
+
+          if (!selected || !art) return;
+
+          art.innerHTML = selected.type === "image"
+            ? `<img class="main-media" src="${escapeHTML(selected.url)}" alt="${escapeHTML(product.title || "Product")}" loading="lazy">`
+            : `<video class="main-media" src="${escapeHTML(selected.url)}" controls preload="metadata" aria-label="${escapeHTML(product.title || "Product")} video"></video>`;
+
+          card.querySelectorAll(".media-thumb").forEach(t => {
+            t.classList.toggle("active", t === button);
+          });
+
+          const newMedia = art.querySelector(".main-media");
+
+          if (newMedia) {
+            newMedia.addEventListener("error", () => {
+              art.innerHTML = '<span class="fallback-icon">🛍️</span>';
+            }, { once: true });
+          }
+        });
+      });
     }
 
     function renderProducts() {
@@ -439,77 +350,64 @@
       const filtered = products.filter(product => {
         const title = String(product.title ?? "");
         const description = String(product.description ?? "");
-        const productCategory = String(product.category ?? "");
+        const cat = String(product.category ?? "");
+        const colors = Array.isArray(product.colors)
+          ? product.colors.join(" ")
+          : String(product.colors ?? product.colours ?? "");
+        const sizes = Array.isArray(product.sizes)
+          ? product.sizes.join(" ")
+          : String(product.sizes ?? "");
 
-        const matchesCategory =
+        const matchCategory =
           category === "All" ||
-          productCategory.toLowerCase() === category.toLowerCase();
+          cat.toLowerCase() === category.toLowerCase();
 
-        const matchesSearch =
-          title.toLowerCase().includes(query) ||
-          description.toLowerCase().includes(query) ||
-          productCategory.toLowerCase().includes(query);
+        const matchSearch = [title, description, cat, colors, sizes]
+          .some(value => value.toLowerCase().includes(query));
 
-        return matchesCategory && matchesSearch;
+        return matchCategory && matchSearch;
       });
 
-      count.textContent =
-        `${filtered.length} ${filtered.length === 1 ? "product" : "products"}`;
+      count.textContent = `${filtered.length} ${filtered.length === 1 ? "product" : "products"}`;
 
-      if (filtered.length === 0) {
-        productList.innerHTML =
-          '<p class="empty">No products found in this category.</p>';
+      if (!filtered.length) {
+        productList.innerHTML = '<p class="empty">No products found in this category.</p>';
         return;
       }
 
-      productList.innerHTML = filtered.map(product => {
-        const imageURL = getSafeImageURL(product.image_url);
+      productList.innerHTML = filtered.map((product, index) => {
         const title = escapeHTML(product.title || "Untitled product");
-        const categoryName = escapeHTML(product.category || "General");
-        const description = escapeHTML(product.description || "More details coming soon.");
-        const stock = Number(product.stock);
-        const safeStock = Number.isFinite(stock) ? Math.max(0, stock) : 0;
-        const imageMarkup = imageURL
-          ? `<img class="product-image" src="${escapeHTML(imageURL)}" alt="${title}" loading="lazy">`
+        const cat = escapeHTML(product.category || "General");
+        const descriptionText = String(product.description ?? "").trim();
+        const description = descriptionText
+          ? `<p class="card-description">${escapeHTML(descriptionText)}</p>`
           : "";
 
-        return `
-          <article class="card">
-            <div class="product-art">
-              <span class="fallback-icon" aria-label="Product image unavailable">🛍️</span>
-              ${imageMarkup}
-            </div>
-            <div class="card-body">
-              <span class="category-label">${categoryName}</span>
-              <h3>${title}</h3>
-              <p class="card-description">${description}</p>
-              <div class="price">
-                ${formatPrice(product.price_minor, product.currency)}
-              </div>
-              <p class="sub">In stock: ${safeStock}</p>
-              <button class="btn btn-blue" type="button" disabled>
-                Shopping features coming soon
-              </button>
-            </div>
-          </article>
-        `;
+        const stock = Number(product.stock);
+        const safeStock = Number.isFinite(stock) ? Math.max(0, stock) : 0;
+        const colors = product.colors ?? product.colours;
+
+        return `<article class="card" data-product-id="${escapeHTML(product.id || "")}">
+          ${renderMedia(product, index)}
+          <div class="card-body">
+            <span class="category-label">${cat}</span>
+            <h3>${title}</h3>
+            ${description}
+            ${renderOptionalList("Colours", colors)}
+            ${renderOptionalList("Sizes", product.sizes)}
+            ${renderRating(product)}
+            <div class="price">${formatPrice(product.price_minor, product.currency)}</div>
+            <p class="sub">In stock: ${safeStock}</p>
+            <button class="btn btn-blue" type="button" disabled>Shopping features coming soon</button>
+          </div>
+        </article>`;
       }).join("");
 
-      productList.querySelectorAll(".product-image").forEach(image => {
-        image.addEventListener("error", () => {
-          image.remove();
-        }, { once: true });
-
-        image.addEventListener("load", () => {
-          const fallback = image.parentElement.querySelector(".fallback-icon");
-          if (fallback) fallback.style.display = "none";
-        }, { once: true });
-      });
+      attachMediaHandlers(filtered);
     }
 
     async function loadProducts() {
-      productList.innerHTML =
-        '<p class="empty">Loading ZAVO products...</p>';
+      productList.innerHTML = '<p class="empty">Loading ZAVO products...</p>';
 
       try {
         const response = await fetch(`${API_URL}/api/products`);
@@ -528,10 +426,7 @@
         renderProducts();
       } catch (error) {
         console.error("ZAVO product loading error:", error);
-
-        productList.innerHTML =
-          '<p class="empty">We could not load products right now. Please try again later.</p>';
-
+        productList.innerHTML = '<p class="empty">We could not load products right now. Please try again later.</p>';
         count.textContent = "Products unavailable";
       }
     }
@@ -539,19 +434,13 @@
     chips.forEach(chip => {
       chip.addEventListener("click", () => {
         category = chip.dataset.category;
-
-        chips.forEach(item => {
-          item.classList.toggle("active", item === chip);
-        });
-
+        chips.forEach(item => item.classList.toggle("active", item === chip));
         renderProducts();
       });
     });
 
     search.addEventListener("input", renderProducts);
     document.getElementById("year").textContent = new Date().getFullYear();
-
     loadProducts();
-  </script>
-</body>
+  </script></body>
 </html>
