@@ -1,0 +1,13 @@
+{
+"$schema": "node_modules/wrangler/config-schema.json",
+"name": "zavo-api",
+"main": "src/index.js",
+"compatibility_date": "2026-10-13",
+"d1_databases": [
+{
+"binding": "DB",
+"database_name": "zavo-marketplace-db",
+"database_id": "ad986ecd-db61-4ef2-9539-fbe403503284"
+}
+]
+}
