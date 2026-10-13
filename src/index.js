@@ -1,4 +1,3 @@
-
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -14,9 +13,9 @@ export default {
       return new Response(null, { status: 204, headers });
     }
 
-    if (url.pathname === "/api/health") {
+    if (url.pathname === "/api/health" && request.method === "GET") {
       return Response.json(
-        { status: "ok", service: "zavo-api-v2" },
+        { status: "ok", service: "zavo-api" },
         { headers }
       );
     }
@@ -33,15 +32,7 @@ export default {
             p.price_minor,
             p.currency,
             p.stock,
-            p.country_of_origin,
-            (
-              SELECT pm.media_url
-              FROM product_media pm
-              WHERE pm.product_id = p.id
-                AND pm.media_type = 'image'
-              ORDER BY pm.sort_order ASC
-              LIMIT 1
-            ) AS image_url
+            p.country_of_origin
           FROM products p
           INNER JOIN vendor_profiles v ON v.id = p.vendor_id
           WHERE p.status = 'published'
@@ -51,11 +42,56 @@ export default {
           LIMIT 50
         `).all();
 
+        const products = result.results || [];
+        let media = [];
+
+        if (products.length > 0) {
+          const placeholders = products.map(() => "?").join(", ");
+          const ids = products.map(product => product.id);
+
+          const mediaResult = await env.DB.prepare(`
+            SELECT product_id, media_url, media_type, sort_order
+            FROM product_media
+            WHERE product_id IN (${placeholders})
+              AND media_type IN ('image', 'video')
+            ORDER BY sort_order ASC
+          `).bind(...ids).all();
+
+          media = mediaResult.results || [];
+        }
+
+        const output = products.map(product => {
+          const productMedia = media.filter(
+            item => item.product_id === product.id
+          );
+
+          const images = productMedia
+            .filter(item => item.media_type === "image")
+            .map(item => item.media_url);
+
+          const videos = productMedia
+            .filter(item => item.media_type === "video")
+            .map(item => item.media_url);
+
+          const item = {
+            ...product,
+            images,
+            videos,
+            image_url: images[0] || null
+          };
+
+          if (!String(item.description || "").trim()) {
+            delete item.description;
+          }
+
+          return item;
+        });
+
         return Response.json(
           {
             success: true,
-            count: result.results.length,
-            products: result.results
+            count: output.length,
+            products: output
           },
           { headers }
         );
@@ -63,7 +99,7 @@ export default {
         return Response.json(
           {
             success: false,
-            error: "Unable to retrieve products. Check the database schema."
+            error: "Unable to retrieve products. Check the database configuration."
           },
           { status: 500, headers }
         );
