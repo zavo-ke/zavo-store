@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,19 +10,14 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <style>
-:root {
-  --blue:#174ea6;
-  --yellow:#ffc928;
-  --ink:#202b3c;
-  --muted:#667085;
-  --bg:#f6f8fc;
-}
+:root{--blue:#174ea6;--yellow:#ffc928;--ink:#202b3c;--muted:#667085;--bg:#f6f8fc;--red:#c62828}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5}
 a{color:inherit;text-decoration:none}
 button,input{font:inherit}
 button{cursor:pointer}
+button:disabled{opacity:.65;cursor:not-allowed}
 .topbar{background:var(--blue);color:#fff;text-align:center;padding:9px 12px;font-size:13px}
 header{background:#fff;border-bottom:1px solid #e7ebf2;position:sticky;top:0;z-index:5}
 .nav{max-width:1120px;margin:auto;padding:15px 20px;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
@@ -73,7 +69,6 @@ h2{margin:0;font-size:27px;letter-spacing:-.7px}
 .rating{font-size:13px;margin:2px 0 8px;color:#7b5900}
 .review{border-left:3px solid var(--yellow);padding-left:9px;margin:8px 0 0;font-size:12px;color:var(--muted)}
 .card .btn{margin-top:13px;font-size:13px;width:100%}
-.card button:disabled{opacity:.72;cursor:not-allowed}
 .empty{grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)}
 .notice{margin-top:30px;padding:18px;border-radius:13px;background:#fff6d7;color:#5d4b17;font-size:13px}
 .about{margin-top:35px;background:#fff;padding:27px;border-radius:18px;border:1px solid #e8ecf3}
@@ -88,31 +83,45 @@ footer p,footer a{color:#dce7ff;font-size:13px}
 .account-box h2{font-size:25px;margin:4px 0 8px}
 .account-intro{font-size:14px;color:var(--muted);margin:0 0 14px}
 .account-close{float:right;border:0;border-radius:8px;background:#eef2f7;padding:8px 10px;color:var(--ink)}
-.account-box label{display:block;font-weight:700;font-size:13px;margin-top:13px}
-.account-box input{display:block;width:100%;min-width:0;padding:12px;border:1px solid #ccd4e0;border-radius:9px;margin-top:5px}
+.account-box label{display:block;font-weight:700;font-size:13px;margin-top:14px}
+.required-star{color:var(--red);font-weight:900}
+.field-example{display:block;color:var(--muted);font-size:11px;font-weight:400;margin-top:2px}
+.account-box input{display:block;width:100%;min-width:0;padding:12px;border:1px solid #ccd4e0;border-radius:9px;margin-top:5px;background:#fff;color:var(--ink)}
+.account-box input:focus{outline:2px solid #a8c7fa;border-color:var(--blue)}
+.account-box input.invalid{border:1.5px solid var(--red);background:#fffafa}
+.field-error{color:var(--red);font-size:12px;margin:4px 0 0;min-height:0;overflow-wrap:anywhere}
+.field-error:not(:empty){padding:2px 0}
 .account-actions{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap}
 .account-actions button{padding:11px 13px;border:0;border-radius:9px;font-weight:700}
 .account-submit{background:var(--blue);color:#fff;flex:1}
 .account-switch{background:#eef3fb;color:var(--blue)}
-.account-message{font-size:13px;overflow-wrap:anywhere;margin:12px 0 0}
+.account-message{font-size:13px;overflow-wrap:anywhere;margin:12px 0 0;color:var(--ink)}
+.account-message.error{color:var(--red)}
+.account-message.success{color:#16703b}
 .account-divider{display:flex;align-items:center;gap:10px;color:#8992a2;font-size:12px;margin:16px 0}
 .account-divider:before,.account-divider:after{content:"";height:1px;background:#e1e6ef;flex:1}
 #google-signin-container{width:100%;max-width:350px;min-height:44px;margin:0 auto;display:flex;justify-content:center;align-items:center;overflow:hidden}
-#google-signin-container iframe{max-width:100%}
 .google-note{font-size:11px;color:var(--muted);margin:7px 0 0;text-align:center;overflow-wrap:anywhere}
 .password-hint{font-size:11px;color:var(--muted);margin:5px 0 0}
+.password-row{display:flex;gap:7px;align-items:center}
+.password-row input{flex:1;width:0}
+.password-toggle{flex:0 0 auto;border:1px solid #ccd4e0;background:#f8faff;color:var(--blue);border-radius:8px;padding:10px 8px;margin-top:5px;font-size:12px;font-weight:700}
 [hidden]{display:none!important}
 @media(max-width:900px){.products{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){
- .hero-inner{grid-template-columns:1fr}.hero{padding:42px 20px}.hero-art{display:none}
- .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
- .product-art{min-height:125px;height:150px}.fallback-icon{font-size:52px}
- .benefit{padding:15px 5px}.benefit b{font-size:12px}.benefit span{font-size:10px}
- .nav{gap:9px}.search{order:3;max-width:none;flex-basis:100%}
- .nav a{font-size:13px}.account-button{padding:8px;font-size:12px}
- h1{letter-spacing:-1px}.account-box{padding:18px}
+.hero-inner{grid-template-columns:1fr}.hero{padding:42px 20px}.hero-art{display:none}
+.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.product-art{min-height:125px;height:150px}.fallback-icon{font-size:52px}
+.benefit{padding:15px 5px}.benefit b{font-size:12px}.benefit span{font-size:10px}
+.nav{gap:9px}.search{order:3;max-width:none;flex-basis:100%}
+.nav a{font-size:13px}.account-button{padding:8px;font-size:12px}
+h1{letter-spacing:-1px}.account-box{padding:18px}
 }
-@media(max-width:360px){.account-panel{padding:6px}.account-box{padding:14px}.account-actions{gap:6px}.account-actions button{padding:10px 8px;font-size:12px}}
+@media(max-width:360px){
+.account-panel{padding:6px}.account-box{padding:14px}
+.account-actions{gap:6px}.account-actions button{padding:10px 8px;font-size:12px}
+.password-toggle{padding:9px 6px}
+}
 </style>
 </head>
 
@@ -120,131 +129,138 @@ footer p,footer a{color:#dce7ff;font-size:13px}
 <div class="topbar">Welcome to ZAVO · Great Deals, Delivered.</div>
 
 <header>
-  <nav class="nav" aria-label="Main navigation">
-    <a class="logo" href="#" aria-label="ZAVO home">ZA<span>V</span>O</a>
-    <input id="search" class="search" type="search" placeholder="Search products..." aria-label="Search products">
-    <a href="#products">Shop now ↓</a>
-    <button class="account-button" id="open-login" type="button">Log in</button>
-    <button class="account-button account-primary" id="open-register" type="button">Sign up</button>
-  </nav>
+<nav class="nav" aria-label="Main navigation">
+<a class="logo" href="#" aria-label="ZAVO home">ZA<span>V</span>O</a>
+<input id="search" class="search" type="search" placeholder="Search products..." aria-label="Search products">
+<a href="#products">Shop now ↓</a>
+<button class="account-button" id="open-login" type="button">Log in</button>
+<button class="account-button account-primary" id="open-register" type="button">Sign up</button>
+</nav>
 </header>
 
 <section class="hero">
-  <div class="hero-inner">
-    <div>
-      <span class="eyebrow">Your next great find</span>
-      <h1>Great deals.<br>Better everyday.</h1>
-      <p>Discover useful finds for your home, style and everyday life — all in one place.</p>
-      <a class="btn btn-yellow" href="#products">Explore products →</a>
-    </div>
-    <div class="hero-art" aria-hidden="true">
-      <div class="bag">🛍️</div>
-      <strong>More value, less fuss.</strong>
-      <small>Your shopping journey starts here.</small>
-    </div>
-  </div>
+<div class="hero-inner">
+<div>
+<span class="eyebrow">Your next great find</span>
+<h1>Great deals.<br>Better everyday.</h1>
+<p>Discover useful finds for your home, style and everyday life — all in one place.</p>
+<a class="btn btn-yellow" href="#products">Explore products →</a>
+</div>
+<div class="hero-art" aria-hidden="true">
+<div class="bag">🛍️</div>
+<strong>More value, less fuss.</strong>
+<small>Your shopping journey starts here.</small>
+</div>
+</div>
 </section>
 
 <section class="benefits" aria-label="Shopping benefits">
-  <div class="benefit"><b>🏷️ Great-value finds</b><span>Discover competitive prices</span></div>
-  <div class="benefit"><b>📦 Supplier-direct</b><span>Products sent by our suppliers</span></div>
-  <div class="benefit"><b>💬 Personal support</b><span>Help when you need it</span></div>
+<div class="benefit"><b>🏷️ Great-value finds</b><span>Discover competitive prices</span></div>
+<div class="benefit"><b>📦 Supplier-direct</b><span>Products sent by our suppliers</span></div>
+<div class="benefit"><b>💬 Personal support</b><span>Help when you need it</span></div>
 </section>
 
 <main>
-  <section id="products">
-    <div class="section-head">
-      <div><h2>Explore our finds</h2><p class="sub">A little something for everyday life.</p></div>
-      <span class="sub" id="count">Loading products...</span>
-    </div>
-    <div class="categories" id="categories" aria-label="Filter products">
-      <button class="chip active" data-category="All" type="button">All products</button>
-      <button class="chip" data-category="Home" type="button">Home</button>
-      <button class="chip" data-category="Fashion" type="button">Fashion</button>
-      <button class="chip" data-category="Beauty" type="button">Beauty</button>
-      <button class="chip" data-category="Tech" type="button">Tech</button>
-      <button class="chip" data-category="General" type="button">General</button>
-    </div>
-    <div class="products" id="product-list"><p class="empty">Loading ZAVO products...</p></div>
-    <div class="notice">
-      <strong>Demo catalogue:</strong> Sample products and illustrative prices are not verified offers.
-      Replace them with confirmed supplier products, real images, accurate prices and delivery terms
-      before accepting orders.
-    </div>
-  </section>
+<section id="products">
+<div class="section-head">
+<div><h2>Explore our finds</h2><p class="sub">A little something for everyday life.</p></div>
+<span class="sub" id="count">Loading products...</span>
+</div>
+<div class="categories" id="categories" aria-label="Filter products">
+<button class="chip active" data-category="All" type="button">All products</button>
+<button class="chip" data-category="Home" type="button">Home</button>
+<button class="chip" data-category="Fashion" type="button">Fashion</button>
+<button class="chip" data-category="Beauty" type="button">Beauty</button>
+<button class="chip" data-category="Tech" type="button">Tech</button>
+<button class="chip" data-category="General" type="button">General</button>
+</div>
+<div class="products" id="product-list"><p class="empty">Loading ZAVO products...</p></div>
+<div class="notice"><strong>Demo catalogue:</strong> Sample products and illustrative prices are not verified offers. Replace them with confirmed supplier products, real images, accurate prices and delivery terms before accepting orders.</div>
+</section>
 
-  <section class="about" id="about">
-    <h2>A smarter way to discover products</h2>
-    <p>ZAVO is being built to help shoppers discover useful products at competitive prices, with clear
-    information and friendly support. We're starting in Kenya, with the ambition to serve more African markets.</p>
-  </section>
+<section class="about" id="about">
+<h2>A smarter way to discover products</h2>
+<p>ZAVO is being built to help shoppers discover useful products at competitive prices, with clear information and friendly support. We're starting in Kenya, with the ambition to serve more African markets.</p>
+</section>
 
-  <section class="about" id="contact">
-    <h2>Interested in a product?</h2>
-    <p>Our order service is being set up. Contact details will be added here once your business number
-    and order process are ready.</p>
-    <p><strong>Coming next:</strong> product enquiries, order confirmation and delivery arrangements.</p>
-  </section>
+<section class="about" id="contact">
+<h2>Interested in a product?</h2>
+<p>Our order service is being set up. Contact details will be added here once your business number and order process are ready.</p>
+<p><strong>Coming next:</strong> product enquiries, order confirmation and delivery arrangements.</p>
+</section>
 </main>
 
 <footer>
-  <div class="footer-inner">
-    <div><div class="footer-logo">ZA<span>V</span>O</div><p>Great Deals, Delivered.</p></div>
-    <div>
-      <a href="#about">About ZAVO</a><br>
-      <a href="#contact">Contact & orders</a>
-      <p>© <span id="year"></span> ZAVO. All rights reserved.</p>
-    </div>
-  </div>
+<div class="footer-inner">
+<div><div class="footer-logo">ZA<span>V</span>O</div><p>Great Deals, Delivered.</p></div>
+<div><a href="#about">About ZAVO</a><br><a href="#contact">Contact & orders</a><p>© <span id="year"></span> ZAVO. All rights reserved.</p></div>
+</div>
 </footer>
 
 <div class="account-panel" id="account-panel" role="dialog" aria-modal="true" aria-labelledby="account-title">
-  <section class="account-box">
-    <button class="account-close" id="close-account" type="button" aria-label="Close account window">Close ✕</button>
-    <h2 id="account-title">Welcome to ZAVO</h2>
-    <p class="account-intro" id="account-intro">Create an account or log in. You can browse products without an account.</p>
+<section class="account-box">
+<button class="account-close" id="close-account" type="button" aria-label="Close account window">Close ✕</button>
+<h2 id="account-title">Welcome to ZAVO</h2>
+<p class="account-intro" id="account-intro">Create an account or log in. You can browse products without an account.</p>
 
-    <form id="register-form" hidden>
-      <label for="register-name">Full name</label>
-      <input id="register-name" name="full_name" autocomplete="name" minlength="2" maxlength="100" required>
+<form id="register-form" hidden novalidate>
+<label for="register-name">Full name <span class="required-star">*</span><span class="field-example">Example: Caroline Akoth Ogot</span></label>
+<input id="register-name" name="full_name" autocomplete="name" minlength="2" maxlength="100" placeholder="e.g. Caroline Akoth Ogot" required aria-describedby="register-name-error">
+<p class="field-error" id="register-name-error" aria-live="polite"></p>
 
-      <label for="register-email">Email address</label>
-      <input id="register-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+<label for="register-email">Email address <span class="required-star">*</span><span class="field-example">Example: caroline@example.com</span></label>
+<input id="register-email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="e.g. caroline@example.com" required aria-describedby="register-email-error">
+<p class="field-error" id="register-email-error" aria-live="polite"></p>
 
-      <label for="register-password">Password (12–128 characters)</label>
-      <input id="register-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
-      <p class="password-hint">Use at least 12 characters. Avoid using a password you use on another website.</p>
+<label for="register-password">Password <span class="required-star">*</span><span class="field-example">Use 12–128 characters; avoid reusing another password.</span></label>
+<div class="password-row">
+<input id="register-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Create a strong password" required aria-describedby="register-password-error password-hint">
+<button class="password-toggle" type="button" data-toggle="register-password">Show</button>
+</div>
+<p class="field-error" id="register-password-error" aria-live="polite"></p>
+<p class="password-hint" id="password-hint">Longer, unique passwords are safer. ZAVO will never display your password.</p>
 
-      <label for="register-confirm-password">Confirm password</label>
-      <input id="register-confirm-password" name="confirm_password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+<label for="register-confirm-password">Confirm password <span class="required-star">*</span><span class="field-example">Enter the same password again.</span></label>
+<div class="password-row">
+<input id="register-confirm-password" name="confirm_password" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Re-enter your password" required aria-describedby="register-confirm-password-error">
+<button class="password-toggle" type="button" data-toggle="register-confirm-password">Show</button>
+</div>
+<p class="field-error" id="register-confirm-password-error" aria-live="polite"></p>
 
-      <div class="account-actions">
-        <button class="account-submit" type="submit">Create account</button>
-        <button class="account-switch" id="switch-login" type="button">Log in instead</button>
-      </div>
-    </form>
+<div class="account-actions">
+<button class="account-submit" type="submit">Create account</button>
+<button class="account-switch" id="switch-login" type="button">Log in instead</button>
+</div>
+</form>
 
-    <form id="login-form" hidden>
-      <label for="login-email">Email address</label>
-      <input id="login-email" name="email" type="email" autocomplete="email" maxlength="254" required>
-      <label for="login-password">Password</label>
-      <input id="login-password" name="password" type="password" autocomplete="current-password" required>
-      <div class="account-actions">
-        <button class="account-submit" type="submit">Log in</button>
-        <button class="account-switch" id="switch-register" type="button">Create account</button>
-      </div>
-    </form>
+<form id="login-form" hidden novalidate>
+<label for="login-email">Email address <span class="required-star">*</span><span class="field-example">Example: caroline@example.com</span></label>
+<input id="login-email" name="email" type="email" autocomplete="username" maxlength="254" placeholder="Enter your registered email" required aria-describedby="login-email-error">
+<p class="field-error" id="login-email-error" aria-live="polite"></p>
 
-    <div id="signed-in-panel" hidden>
-      <p id="signed-in-message"></p>
-      <div class="account-actions"><button class="account-submit" id="logout-button" type="button">Log out</button></div>
-    </div>
+<label for="login-password">Password <span class="required-star">*</span><span class="field-example">Enter the password you used when registering.</span></label>
+<div class="password-row">
+<input id="login-password" name="password" type="password" autocomplete="current-password" maxlength="128" placeholder="Enter your password" required aria-describedby="login-password-error">
+<button class="password-toggle" type="button" data-toggle="login-password">Show</button>
+</div>
+<p class="field-error" id="login-password-error" aria-live="polite"></p>
 
-    <div class="account-divider">OR</div>
-    <div id="google-signin-container"></div>
-    <p class="google-note" id="google-note">Sign in securely with your Google account.</p>
-    <p class="account-message" id="account-message" role="status" aria-live="polite"></p>
-  </section>
+<div class="account-actions">
+<button class="account-submit" type="submit">Log in</button>
+<button class="account-switch" id="switch-register" type="button">Create account</button>
+</div>
+</form>
+
+<div id="signed-in-panel" hidden>
+<p id="signed-in-message"></p>
+<div class="account-actions"><button class="account-submit" id="logout-button" type="button">Log out</button></div>
+</div>
+
+<div class="account-divider">OR</div>
+<div id="google-signin-container"></div>
+<p class="google-note" id="google-note">Sign in securely with your Google account.</p>
+<p class="account-message" id="account-message" role="status" aria-live="polite"></p>
+</section>
 </div>
 
 <script>
@@ -253,457 +269,411 @@ footer p,footer a{color:#dce7ff;font-size:13px}
 const API_URL = "https://zavo-api.owinosylvester2025.workers.dev";
 const GOOGLE_CLIENT_ID = "776829851538-0qs24flt8ia16d6p3ir3fps9s7tmfbee.apps.googleusercontent.com";
 
-const search = document.getElementById("search");
-const productList = document.getElementById("product-list");
-const count = document.getElementById("count");
+const $ = id => document.getElementById(id);
+const search = $("search");
+const productList = $("product-list");
+const count = $("count");
 const chips = [...document.querySelectorAll(".chip")];
 let products = [];
 let category = "All";
 
-function formatPrice(amount, currency) {
-  const n = Number(amount);
-  if (!Number.isFinite(n)) return "Price unavailable";
-  try {
-    return new Intl.NumberFormat("en-KE", {
-      style: "currency", currency: currency || "KES", maximumFractionDigits: 2
-    }).format(n / 100);
-  } catch { return "Price unavailable"; }
+function formatPrice(amount,currency){
+  const n=Number(amount);
+  if(!Number.isFinite(n))return "Price unavailable";
+  try{return new Intl.NumberFormat("en-KE",{style:"currency",currency:currency||"KES",maximumFractionDigits:2}).format(n/100)}
+  catch{return "Price unavailable"}
 }
-
-function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  }[c]));
+function escapeHTML(value){
+  return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
-
-function getSafeMediaURL(value) {
-  if (typeof value !== "string" || !value.trim()) return "";
-  try {
-    const u = new URL(value);
-    return u.protocol === "https:" || u.protocol === "http:" ? u.href : "";
-  } catch { return ""; }
+function getSafeMediaURL(value){
+  if(typeof value!=="string"||!value.trim())return "";
+  try{const u=new URL(value);return u.protocol==="https:"||u.protocol==="http:"?u.href:""}catch{return ""}
 }
-
-function normalizeMedia(product) {
-  const media = [];
-  (Array.isArray(product.images) ? product.images : []).forEach(value => {
-    const url = getSafeMediaURL(value);
-    if (url) media.push({type:"image",url});
-  });
-  (Array.isArray(product.videos) ? product.videos : []).forEach(value => {
-    const url = getSafeMediaURL(value);
-    if (url) media.push({type:"video",url});
-  });
-  if (!media.length) {
-    const url = getSafeMediaURL(product.image_url);
-    if (url) media.push({type:"image",url});
-  }
+function normalizeMedia(product){
+  const media=[];
+  (Array.isArray(product.images)?product.images:[]).forEach(value=>{const url=getSafeMediaURL(value);if(url)media.push({type:"image",url})});
+  (Array.isArray(product.videos)?product.videos:[]).forEach(value=>{const url=getSafeMediaURL(value);if(url)media.push({type:"video",url})});
+  if(!media.length){const url=getSafeMediaURL(product.image_url);if(url)media.push({type:"image",url})}
   return media;
 }
-
-function renderOptionalList(label, value) {
-  let items = [];
-  if (Array.isArray(value)) items = value.map(v => String(v ?? "").trim()).filter(Boolean);
-  else if (typeof value === "string" && value.trim()) items = value.split(",").map(v => v.trim()).filter(Boolean);
-  if (!items.length) return "";
+function renderOptionalList(label,value){
+  let items=[];
+  if(Array.isArray(value))items=value.map(v=>String(v??"").trim()).filter(Boolean);
+  else if(typeof value==="string"&&value.trim())items=value.split(",").map(v=>v.trim()).filter(Boolean);
+  if(!items.length)return "";
   return `<p class="meta-line"><strong>${escapeHTML(label)}:</strong> ${items.map(escapeHTML).join(", ")}</p>`;
 }
-
-function renderRating(product) {
-  const raw = product.rating ?? product.average_rating;
-  const number = Number(raw);
-  const hasRating = raw !== null && raw !== undefined && String(raw).trim() !== "" &&
-    Number.isFinite(number) && number >= 0 && number <= 5;
-  const review = String(product.review_text ?? product.review ?? "").trim();
-  let output = "";
-  if (hasRating) output += `<p class="rating" aria-label="Rating ${number} out of 5">★ ${Math.round(number*10)/10}/5</p>`;
-  if (review) output += `<p class="review">${escapeHTML(review)}</p>`;
+function renderRating(product){
+  const raw=product.rating??product.average_rating;
+  const number=Number(raw);
+  const hasRating=raw!==null&&raw!==undefined&&String(raw).trim()!==""&&Number.isFinite(number)&&number>=0&&number<=5;
+  const review=String(product.review_text??product.review??"").trim();
+  let output="";
+  if(hasRating)output+=`<p class="rating" aria-label="Rating ${number} out of 5">★ ${Math.round(number*10)/10}/5</p>`;
+  if(review)output+=`<p class="review">${escapeHTML(review)}</p>`;
   return output;
 }
-
-function renderMedia(product, index) {
-  const media = normalizeMedia(product);
-  const title = escapeHTML(product.title || "Product");
-  let main = '<span class="fallback-icon" aria-label="Product image unavailable">🛍️</span>';
-
-  if (media[0]) {
-    main = media[0].type === "image"
-      ? `<img class="main-media" src="${escapeHTML(media[0].url)}" alt="${title}" loading="lazy">`
-      : `<video class="main-media" src="${escapeHTML(media[0].url)}" controls preload="metadata" aria-label="${title} video"></video>`;
-  }
-
-  const thumbnails = media.length > 1 ? `<div class="media-controls" aria-label="More product media">
-    ${media.map((item,i) => `<button class="media-thumb ${i===0?"active":""}" type="button"
-      data-product-index="${index}" data-media-index="${i}" aria-label="Show ${item.type} ${i+1}">
-      ${item.type==="image" ? `<img src="${escapeHTML(item.url)}" alt="" loading="lazy">` : '<span aria-hidden="true">▶</span>'}
-    </button>`).join("")}
-  </div>` : "";
-
+function renderMedia(product,index){
+  const media=normalizeMedia(product);
+  const title=escapeHTML(product.title||"Product");
+  let main='<span class="fallback-icon" aria-label="Product image unavailable">🛍️</span>';
+  if(media[0])main=media[0].type==="image"
+    ?`<img class="main-media" src="${escapeHTML(media[0].url)}" alt="${title}" loading="lazy">`
+    :`<video class="main-media" src="${escapeHTML(media[0].url)}" controls preload="metadata" aria-label="${title} video"></video>`;
+  const thumbnails=media.length>1?`<div class="media-controls" aria-label="More product media">
+  ${media.map((item,i)=>`<button class="media-thumb ${i===0?"active":""}" type="button" data-product-index="${index}" data-media-index="${i}" aria-label="Show ${item.type} ${i+1}">${item.type==="image"?`<img src="${escapeHTML(item.url)}" alt="" loading="lazy">`:'<span aria-hidden="true">▶</span>'}</button>`).join("")}
+  </div>`:"";
   return `<div class="product-art">${main}</div>${thumbnails}`;
 }
-
-function attachMediaHandlers(filtered) {
-  productList.querySelectorAll(".main-media").forEach(element => {
-    element.addEventListener("error", () => {
-      const art = element.closest(".product-art");
-      if (!art) return;
-      element.remove();
-      if (!art.querySelector(".fallback-icon")) {
-        const fallback = document.createElement("span");
-        fallback.className = "fallback-icon";
-        fallback.textContent = "🛍️";
-        art.appendChild(fallback);
-      }
-    }, {once:true});
-  });
-
-  productList.querySelectorAll(".media-thumb").forEach(button => {
-    button.addEventListener("click", () => {
-      const product = filtered[Number(button.dataset.productIndex)];
-      if (!product) return;
-      const media = normalizeMedia(product)[Number(button.dataset.mediaIndex)];
-      const card = button.closest(".card");
-      const art = card?.querySelector(".product-art");
-      if (!media || !art) return;
-
-      art.innerHTML = media.type === "image"
-        ? `<img class="main-media" src="${escapeHTML(media.url)}" alt="${escapeHTML(product.title || "Product")}" loading="lazy">`
-        : `<video class="main-media" src="${escapeHTML(media.url)}" controls preload="metadata"></video>`;
-
-      card.querySelectorAll(".media-thumb").forEach(thumb => thumb.classList.toggle("active",thumb===button));
-      const element = art.querySelector(".main-media");
-      if (element) element.addEventListener("error", () => {
-        art.innerHTML = '<span class="fallback-icon">🛍️</span>';
-      }, {once:true});
-    });
-  });
+function attachMediaHandlers(filtered){
+  productList.querySelectorAll(".main-media").forEach(element=>element.addEventListener("error",()=>{
+    const art=element.closest(".product-art");if(!art)return;
+    element.remove();
+    if(!art.querySelector(".fallback-icon")){const fallback=document.createElement("span");fallback.className="fallback-icon";fallback.textContent="🛍️";art.appendChild(fallback)}
+  },{once:true}));
+  productList.querySelectorAll(".media-thumb").forEach(button=>button.addEventListener("click",()=>{
+    const product=filtered[Number(button.dataset.productIndex)];
+    if(!product)return;
+    const media=normalizeMedia(product)[Number(button.dataset.mediaIndex)];
+    const card=button.closest(".card");const art=card?.querySelector(".product-art");
+    if(!media||!art)return;
+    art.innerHTML=media.type==="image"
+      ?`<img class="main-media" src="${escapeHTML(media.url)}" alt="${escapeHTML(product.title||"Product")}" loading="lazy">`
+      :`<video class="main-media" src="${escapeHTML(media.url)}" controls preload="metadata"></video>`;
+    card.querySelectorAll(".media-thumb").forEach(thumb=>thumb.classList.toggle("active",thumb===button));
+    const element=art.querySelector(".main-media");
+    if(element)element.addEventListener("error",()=>{art.innerHTML='<span class="fallback-icon">🛍️</span>'},{once:true});
+  }));
 }
-
-function renderProducts() {
-  const query = search.value.trim().toLowerCase();
-  const filtered = products.filter(product => {
-    const cat = String(product.category ?? "");
-    const colors = Array.isArray(product.colors) ? product.colors.join(" ") : String(product.colors ?? product.colours ?? "");
-    const sizes = Array.isArray(product.sizes) ? product.sizes.join(" ") : String(product.sizes ?? "");
-    return (category === "All" || cat.toLowerCase() === category.toLowerCase()) &&
-      [String(product.title ?? ""),String(product.description ?? ""),cat,colors,sizes]
-        .some(value => value.toLowerCase().includes(query));
+function renderProducts(){
+  const query=search.value.trim().toLowerCase();
+  const filtered=products.filter(product=>{
+    const cat=String(product.category??"");
+    const colors=Array.isArray(product.colors)?product.colors.join(" "):String(product.colors??product.colours??"");
+    const sizes=Array.isArray(product.sizes)?product.sizes.join(" "):String(product.sizes??"");
+    return(category==="All"||cat.toLowerCase()===category.toLowerCase())&&
+      [String(product.title??""),String(product.description??""),cat,colors,sizes].some(value=>value.toLowerCase().includes(query));
   });
-
-  count.textContent = `${filtered.length} ${filtered.length===1?"product":"products"}`;
-  if (!filtered.length) {
-    productList.innerHTML = '<p class="empty">No products found in this category.</p>';
-    return;
-  }
-
-  productList.innerHTML = filtered.map((product,index) => {
-    const title = escapeHTML(product.title || "Untitled product");
-    const cat = escapeHTML(product.category || "General");
-    const descriptionText = String(product.description ?? "").trim();
-    const description = descriptionText ? `<p class="card-description">${escapeHTML(descriptionText)}</p>` : "";
-    const quantity = Number(product.stock);
-    const stock = Number.isFinite(quantity) ? Math.max(0,quantity) : 0;
-
-    return `<article class="card" data-product-id="${escapeHTML(product.id || "")}">
-      ${renderMedia(product,index)}
-      <div class="card-body">
-        <span class="category-label">${cat}</span><h3>${title}</h3>${description}
-        ${renderOptionalList("Colours",product.colors ?? product.colours)}
-        ${renderOptionalList("Sizes",product.sizes)}
-        ${renderRating(product)}
-        <div class="price">${formatPrice(product.price_minor,product.currency)}</div>
-        <p class="sub">In stock: ${stock}</p>
-        <button class="btn btn-blue" type="button" disabled>Shopping features coming soon</button>
-      </div></article>`;
+  count.textContent=`${filtered.length} ${filtered.length===1?"product":"products"}`;
+  if(!filtered.length){productList.innerHTML='<p class="empty">No products found in this category.</p>';return}
+  productList.innerHTML=filtered.map((product,index)=>{
+    const title=escapeHTML(product.title||"Untitled product");
+    const cat=escapeHTML(product.category||"General");
+    const descriptionText=String(product.description??"").trim();
+    const description=descriptionText?`<p class="card-description">${escapeHTML(descriptionText)}</p>`:"";
+    const quantity=Number(product.stock);
+    const stock=Number.isFinite(quantity)?Math.max(0,quantity):0;
+    return `<article class="card" data-product-id="${escapeHTML(product.id||"")}">
+    ${renderMedia(product,index)}
+    <div class="card-body"><span class="category-label">${cat}</span><h3>${title}</h3>${description}
+    ${renderOptionalList("Colours",product.colors??product.colours)}
+    ${renderOptionalList("Sizes",product.sizes)}${renderRating(product)}
+    <div class="price">${formatPrice(product.price_minor,product.currency)}</div>
+    <p class="sub">In stock: ${stock}</p>
+    <button class="btn btn-blue" type="button" disabled>Shopping features coming soon</button>
+    </div></article>`;
   }).join("");
-
   attachMediaHandlers(filtered);
 }
-
-async function loadProducts() {
-  productList.innerHTML = '<p class="empty">Loading ZAVO products...</p>';
-  try {
-    const response = await fetch(`${API_URL}/api/products`);
-    if (!response.ok) throw new Error("The product API returned an error.");
-    const data = await response.json();
-    if (!data.success || !Array.isArray(data.products)) throw new Error("Unexpected product API response.");
-    products = data.products;
-    renderProducts();
-  } catch (error) {
+async function loadProducts(){
+  productList.innerHTML='<p class="empty">Loading ZAVO products...</p>';
+  try{
+    const res=await fetch(`${API_URL}/api/products`);
+    if(!res.ok)throw new Error(`The product service returned HTTP ${res.status}.`);
+    const data=await res.json();
+    if(!data.success||!Array.isArray(data.products))throw new Error("The product service returned an unexpected response.");
+    products=data.products;renderProducts();
+  }catch(error){
     console.error("ZAVO product loading error:",error);
-    productList.innerHTML = '<p class="empty">We could not load products right now. Please try again later.</p>';
-    count.textContent = "Products unavailable";
+    productList.innerHTML=`<p class="empty">${escapeHTML(networkMessage(error,"load products"))}</p>`;
+    count.textContent="Products unavailable";
   }
 }
-
-chips.forEach(chip => chip.addEventListener("click",() => {
-  category = chip.dataset.category;
-  chips.forEach(item => item.classList.toggle("active",item===chip));
+chips.forEach(chip=>chip.addEventListener("click",()=>{
+  category=chip.dataset.category;
+  chips.forEach(item=>item.classList.toggle("active",item===chip));
   renderProducts();
 }));
 search.addEventListener("input",renderProducts);
-document.getElementById("year").textContent = new Date().getFullYear();
+$("year").textContent=new Date().getFullYear();
 loadProducts();
 
-/* ACCOUNT FUNCTIONS */
+/* ACCOUNT AND FIELD VALIDATION */
+const panel=$("account-panel");
+const registerForm=$("register-form");
+const loginForm=$("login-form");
+const accountTitle=$("account-title");
+const accountIntro=$("account-intro");
+const accountMessage=$("account-message");
+const signedInPanel=$("signed-in-panel");
+const signedInMessage=$("signed-in-message");
+const googleContainer=$("google-signin-container");
+const googleNote=$("google-note");
 
-const panel = document.getElementById("account-panel");
-const registerForm = document.getElementById("register-form");
-const loginForm = document.getElementById("login-form");
-const accountTitle = document.getElementById("account-title");
-const accountIntro = document.getElementById("account-intro");
-const accountMessage = document.getElementById("account-message");
-const signedInPanel = document.getElementById("signed-in-panel");
-const signedInMessage = document.getElementById("signed-in-message");
-const googleContainer = document.getElementById("google-signin-container");
-const googleNote = document.getElementById("google-note");
-
-function token() { return sessionStorage.getItem("zavoToken"); }
-
-function updateLoginButton(isLoggedIn) {
-  document.getElementById("open-login").textContent = isLoggedIn ? "My account" : "Log in";
+function token(){return sessionStorage.getItem("zavoToken")}
+function updateLoginButton(isLoggedIn){$("open-login").textContent=isLoggedIn?"My account":"Log in"}
+function showMessage(message,type=""){
+  accountMessage.textContent=message;
+  accountMessage.className="account-message"+(type?" "+type:"");
 }
-
-function showAccount(mode) {
+function clearMessages(){
+  showMessage("");
+  document.querySelectorAll(".field-error").forEach(el=>el.textContent="");
+  document.querySelectorAll(".account-box input").forEach(el=>el.classList.remove("invalid"));
+}
+function setFieldError(input,message){
+  const error=$(input.id+"-error");
+  if(error)error.textContent=message;
+  input.classList.toggle("invalid",Boolean(message));
+  input.setAttribute("aria-invalid",message?"true":"false");
+}
+function clearField(input){setFieldError(input,"")}
+function showAccount(mode){
+  clearMessages();
   panel.classList.add("open");
-  registerForm.hidden = mode !== "register";
-  loginForm.hidden = mode !== "login";
-  signedInPanel.hidden = true;
-  accountTitle.textContent = mode === "register" ? "Create your ZAVO account" : "Log in to ZAVO";
-  accountIntro.textContent = "You can browse ZAVO products without an account.";
-  accountMessage.textContent = "";
+  registerForm.hidden=mode!=="register";
+  loginForm.hidden=mode!=="login";
+  signedInPanel.hidden=true;
+  accountTitle.textContent=mode==="register"?"Create your ZAVO account":"Log in to ZAVO";
+  accountIntro.textContent="You can browse ZAVO products without an account.";
+  if(window.google?.accounts?.id)setTimeout(initializeGoogleSignIn,100);
 }
-
-function closeAccount() { panel.classList.remove("open"); }
-
-document.getElementById("open-login").addEventListener("click",async () => {
-  if (token()) {
-    try {
-      const result = await accountRequest("me",null,token());
-      registerForm.hidden = true;
-      loginForm.hidden = true;
-      signedInPanel.hidden = false;
-      accountTitle.textContent = "Your ZAVO account";
-      accountIntro.textContent = "You can continue browsing products.";
-      signedInMessage.textContent = `Welcome back, ${result.user?.full_name || "ZAVO customer"}.`;
-      accountMessage.textContent = "";
-      panel.classList.add("open");
-      return;
-    } catch {
-      sessionStorage.removeItem("zavoToken");
-      updateLoginButton(false);
-    }
+function closeAccount(){panel.classList.remove("open")}
+$("open-login").addEventListener("click",async()=>{
+  if(token()){
+    try{
+      const result=await accountRequest("me",null,token());
+      registerForm.hidden=true;loginForm.hidden=true;signedInPanel.hidden=false;
+      accountTitle.textContent="Your ZAVO account";
+      accountIntro.textContent="You can continue browsing products.";
+      signedInMessage.textContent=`Welcome back, ${result.user?.full_name||"ZAVO customer"}.`;
+      clearMessages();panel.classList.add("open");return;
+    }catch{sessionStorage.removeItem("zavoToken");updateLoginButton(false)}
   }
   showAccount("login");
 });
+$("open-register").addEventListener("click",()=>showAccount("register"));
+$("close-account").addEventListener("click",closeAccount);
+panel.addEventListener("click",event=>{if(event.target===panel)closeAccount()});
+document.addEventListener("keydown",event=>{if(event.key==="Escape")closeAccount()});
+$("switch-login").addEventListener("click",()=>showAccount("login"));
+$("switch-register").addEventListener("click",()=>showAccount("register"));
 
-document.getElementById("open-register").addEventListener("click",() => showAccount("register"));
-document.getElementById("close-account").addEventListener("click",closeAccount);
-panel.addEventListener("click",event => { if (event.target===panel) closeAccount(); });
-document.addEventListener("keydown",event => { if (event.key==="Escape") closeAccount(); });
-document.getElementById("switch-login").addEventListener("click",() => showAccount("login"));
-document.getElementById("switch-register").addEventListener("click",() => showAccount("register"));
-
-async function accountRequest(path,data,sessionToken) {
-  const headers = {"Content-Type":"application/json"};
-  if (sessionToken) headers.Authorization = `Bearer ${sessionToken}`;
-  const options = {method:path==="me"?"GET":"POST",headers};
-  if (path!=="me") options.body = JSON.stringify(data || {});
-  const response = await fetch(`${API_URL}/api/auth/${path}`,options);
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(result.error || "Request failed. Please try again.");
+/* Translate common network failures into useful plain language. */
+function networkMessage(error,action){
+  const message=String(error?.message||"");
+  if(message.includes("HTTP 404"))return "This ZAVO service address was not found. Please contact support.";
+  if(message.includes("HTTP 401"))return "Your email/password combination was not accepted. Check your details and try again.";
+  if(message.includes("HTTP 403"))return "This request was blocked. Please open the official ZAVO website and try again.";
+  if(message.includes("HTTP 409"))return "An account already exists with these details. Try logging in instead.";
+  if(message.includes("HTTP 429"))return "Too many attempts were made. Please wait a few minutes and try again.";
+  if(message.includes("HTTP 5"))return "The ZAVO server is temporarily having a problem. Please try again shortly.";
+  if(error instanceof TypeError||/fetch|network|failed to fetch/i.test(message)){
+    if(location.hostname!=="zavo-store.pages.dev"){
+      return "You are viewing a different website address. Open https://zavo-store.pages.dev and try again. Google sign-in and account requests may not work on the GitHub preview.";
+    }
+    return `ZAVO could not connect to its account service while trying to ${action}. Check your internet connection. If your connection works, the Cloudflare API or its access settings may be unavailable. Please try again shortly.`;
+  }
+  return message||`ZAVO could not ${action}. Please check your details and try again.`;
+}
+async function accountRequest(path,data,sessionToken){
+  const headers={"Content-Type":"application/json"};
+  if(sessionToken)headers.Authorization=`Bearer ${sessionToken}`;
+  const options={method:path==="me"?"GET":"POST",headers};
+  if(path!=="me")options.body=JSON.stringify(data||{});
+  let res;
+  try{res=await fetch(`${API_URL}/api/auth/${path}`,options)}
+  catch(error){throw new Error(networkMessage(error,path==="register"?"create your account":path==="login"?"log you in":"complete your request"))}
+  let result={};
+  try{result=await res.json()}catch{}
+  if(!res.ok){
+    const error=new Error(result.error||`ZAVO returned an error (HTTP ${res.status}).`);
+    error.status=res.status;error.apiMessage=result.error||"";
+    throw error;
+  }
   return result;
 }
-
-/* Confirm passwords before sending registration to the API. */
-registerForm.addEventListener("submit",async event => {
-  event.preventDefault();
-
-  const password = document.getElementById("register-password").value;
-  const confirmPassword = document.getElementById("register-confirm-password").value;
-
-  if (password.length < 12 || password.length > 128) {
-    accountMessage.textContent = "Your password must contain between 12 and 128 characters.";
-    return;
-  }
-  if (password !== confirmPassword) {
-    accountMessage.textContent = "Your passwords do not match. Please check both fields.";
-    document.getElementById("register-confirm-password").focus();
-    return;
-  }
-
-  const button = registerForm.querySelector('[type="submit"]');
-  button.disabled = true;
-  accountMessage.textContent = "Creating your account…";
-
-  try {
-    const formData = Object.fromEntries(new FormData(registerForm).entries());
-    delete formData.confirm_password;
-
-    const result = await accountRequest("register",formData);
-    registerForm.reset();
-
-    if (result.verification_required || result.email_verification_required) {
-      showAccount("login");
-      accountMessage.textContent = result.message ||
-        "Check your email for a verification link before logging in.";
-    } else {
-      showAccount("login");
-      accountMessage.textContent = result.message ||
-        "Your account request was received. If email verification is enabled, check your inbox before logging in.";
-    }
-  } catch (error) {
-    accountMessage.textContent = error.message;
-  } finally {
-    button.disabled = false;
-  }
-});
-
-loginForm.addEventListener("submit",async event => {
-  event.preventDefault();
-  const button = loginForm.querySelector('[type="submit"]');
-  button.disabled = true;
-  accountMessage.textContent = "Logging in…";
-
-  try {
-    const formData = Object.fromEntries(new FormData(loginForm).entries());
-    const result = await accountRequest("login",formData);
-    if (!result.token) throw new Error("The API did not return a session token.");
-
-    sessionStorage.setItem("zavoToken",result.token);
-    loginForm.reset();
-    registerForm.hidden = true;
-    loginForm.hidden = true;
-    signedInPanel.hidden = false;
-    accountTitle.textContent = "You're logged in";
-    signedInMessage.textContent = `Welcome, ${result.user?.full_name || "ZAVO customer"}.`;
-    accountIntro.textContent = "You can continue browsing products.";
-    accountMessage.textContent = "Login successful.";
-    updateLoginButton(true);
-  } catch (error) {
-    accountMessage.textContent = error.message;
-  } finally {
-    button.disabled = false;
-  }
-});
-
-document.getElementById("logout-button").addEventListener("click",async () => {
-  const button = document.getElementById("logout-button");
-  button.disabled = true;
-  accountMessage.textContent = "Logging out…";
-
-  try {
-    if (token()) await accountRequest("logout",{},token());
-    sessionStorage.removeItem("zavoToken");
-    updateLoginButton(false);
-    showAccount("login");
-    accountMessage.textContent = "You have logged out.";
-  } catch (error) {
-    accountMessage.textContent = `Logout could not be confirmed: ${error.message}`;
-  } finally {
-    button.disabled = false;
-  }
-});
-
-async function checkSavedAccount() {
-  if (!token()) return;
-  try {
-    const result = await accountRequest("me",null,token());
-    updateLoginButton(true);
-    signedInMessage.textContent = `Welcome back, ${result.user?.full_name || "ZAVO customer"}.`;
-  } catch {
-    sessionStorage.removeItem("zavoToken");
-    updateLoginButton(false);
-  }
+function validEmail(value){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)&&value.length<=254}
+function validateRegister(){
+  let valid=true;
+  const name=$("register-name"),email=$("register-email"),password=$("register-password"),confirm=$("register-confirm-password");
+  [name,email,password,confirm].forEach(clearField);
+  if(name.value.trim().length<2||name.value.trim().length>100){setFieldError(name,"Enter your full name using 2–100 characters.");valid=false}
+  if(!validEmail(email.value.trim())){setFieldError(email,"Enter a valid email address, for example caroline@example.com.");valid=false}
+  if(password.value.length<12||password.value.length>128){setFieldError(password,"Password must contain between 12 and 128 characters.");valid=false}
+  if(confirm.value!==password.value||!confirm.value){setFieldError(confirm,"Please enter the same password in both password fields.");valid=false}
+  return valid;
 }
+function validateLogin(){
+  let valid=true;
+  const email=$("login-email"),password=$("login-password");
+  clearField(email);clearField(password);
+  if(!validEmail(email.value.trim())){setFieldError(email,"Enter a valid email address.");valid=false}
+  if(!password.value){setFieldError(password,"Enter your password.");valid=false}
+  return valid;
+}
+["register-name","register-email","register-password","register-confirm-password","login-email","login-password"].forEach(id=>{
+  const input=$(id);
+  input.addEventListener("input",()=>{
+    clearField(input);
+    if(id==="register-password"&&$("register-confirm-password").value)clearField($("register-confirm-password"));
+    if(id==="register-confirm-password"&&input.value!==$("register-password").value)setFieldError(input,"The passwords do not match.");
+    if(id==="register-confirm-password"&&input.value===$("register-password").value)clearField(input);
+  });
+});
+document.querySelectorAll("[data-toggle]").forEach(button=>button.addEventListener("click",()=>{
+  const input=$(button.dataset.toggle);
+  const show=input.type==="password";
+  input.type=show?"text":"password";
+  button.textContent=show?"Hide":"Show";
+}));
+
+registerForm.addEventListener("submit",async event=>{
+  event.preventDefault();clearMessages();
+  if(!validateRegister()){
+    showMessage("Please correct the fields marked in red.","error");
+    const first=registerForm.querySelector(".invalid");if(first)first.focus();
+    return;
+  }
+  const button=registerForm.querySelector('[type="submit"]');
+  button.disabled=true;button.textContent="Creating account…";
+  showMessage("Creating your account…");
+  try{
+    const result=await accountRequest("register",{
+      full_name:$("register-name").value.trim(),
+      email:$("register-email").value.trim().toLowerCase(),
+      password:$("register-password").value
+    });
+    registerForm.reset();
+    showAccount("login");
+    showMessage(result.message||"Your account has been created. Please log in using your email and password.","success");
+    $("login-email").value="";
+    $("login-password").value="";
+  }catch(error){
+    const msg=error.apiMessage||error.message;
+    if(error.status===409){
+      setFieldError($("register-email"),"This email already has a ZAVO account. Please log in instead.");
+      $("register-email").focus();
+      showMessage("Account not created. Check the email field or choose Log in instead.","error");
+    }else if(/full name/i.test(msg))setFieldError($("register-name"),msg);
+    else if(/email/i.test(msg))setFieldError($("register-email"),msg);
+    else if(/password/i.test(msg))setFieldError($("register-password"),msg);
+    else showMessage(networkMessage(error,"create your account"),"error");
+  }finally{button.disabled=false;button.textContent="Create account"}
+});
+
+loginForm.addEventListener("submit",async event=>{
+  event.preventDefault();clearMessages();
+  if(!validateLogin()){
+    showMessage("Please correct the fields marked in red.","error");
+    const first=loginForm.querySelector(".invalid");if(first)first.focus();
+    return;
+  }
+  const button=loginForm.querySelector('[type="submit"]');
+  button.disabled=true;button.textContent="Logging in…";
+  try{
+    const result=await accountRequest("login",{
+      email:$("login-email").value.trim().toLowerCase(),
+      password:$("login-password").value
+    });
+    if(!result.token)throw new Error("The server did not return a login session. Please try again.");
+    sessionStorage.setItem("zavoToken",result.token);
+    loginForm.reset();registerForm.hidden=true;loginForm.hidden=true;signedInPanel.hidden=false;
+    accountTitle.textContent="You're logged in";
+    accountIntro.textContent="You can continue browsing products.";
+    signedInMessage.textContent=`Welcome, ${result.user?.full_name||"ZAVO customer"}.`;
+    showMessage("Login successful.","success");updateLoginButton(true);
+  }catch(error){
+    if(error.status===401){
+      setFieldError($("login-password"),"The email or password is incorrect. Check both details and try again.");
+      $("login-password").focus();
+      showMessage("Login unsuccessful. Check your email and password.","error");
+    }else if(error.status===403){
+      showMessage(error.apiMessage||"This account is not active. Please contact ZAVO support.","error");
+    }else{
+      showMessage(networkMessage(error,"log you in"),"error");
+    }
+  }finally{button.disabled=false;button.textContent="Log in"}
+});
+
+$("logout-button").addEventListener("click",async()=>{
+  const button=$("logout-button");button.disabled=true;
+  try{
+    if(token())await accountRequest("logout",{},token());
+    sessionStorage.removeItem("zavoToken");updateLoginButton(false);
+    showAccount("login");showMessage("You have logged out.","success");
+  }catch(error){
+    /* Clear the browser session even if the server cannot be reached. */
+    sessionStorage.removeItem("zavoToken");updateLoginButton(false);
+    showAccount("login");
+    showMessage("You have been logged out on this device. The server could not confirm the session removal; reconnect and try again if needed.","error");
+  }finally{button.disabled=false}
+});
 
 /* GOOGLE SIGN-IN */
-
-function initializeGoogleSignIn() {
-  if (!googleContainer) return;
-  if (!GOOGLE_CLIENT_ID) {
-    googleNote.textContent = "Google sign-in is not configured yet.";
+function initializeGoogleSignIn(){
+  if(!googleContainer)return;
+  if(location.hostname!=="zavo-store.pages.dev"){
+    googleNote.textContent="For the official sign-in experience, open https://zavo-store.pages.dev. The GitHub preview may not be authorized by Google.";
+  }
+  if(!GOOGLE_CLIENT_ID){googleNote.textContent="Google sign-in is not configured yet.";return}
+  if(!window.google?.accounts?.id){
+    googleNote.textContent="Google sign-in could not load. Check your internet connection and reload this page.";
     return;
   }
-  if (!window.google?.accounts?.id) {
-    googleNote.textContent = "Google sign-in could not load. Check your internet connection and reload this page.";
-    return;
-  }
-
-  try {
+  try{
     google.accounts.id.initialize({
       client_id:GOOGLE_CLIENT_ID,
       callback:handleGoogleCredential,
       auto_select:false
     });
-
-    googleContainer.innerHTML = "";
-    const box = document.querySelector(".account-box");
-    const availableWidth = Math.floor((box?.clientWidth || 390) - 44);
-    const buttonWidth = Math.max(200,Math.min(350,availableWidth));
-
+    googleContainer.innerHTML="";
+    const availableWidth=Math.max(180,Math.floor((document.querySelector(".account-box")?.clientWidth||390)-40));
     google.accounts.id.renderButton(googleContainer,{
-      type:"standard",
-      theme:"outline",
-      size:"large",
-      text:"signin_with",
-      shape:"rectangular",
-      width:buttonWidth,
-      logo_alignment:"left"
+      type:"standard",theme:"outline",size:"large",text:"continue_with",
+      shape:"rectangular",width:Math.min(availableWidth,350),logo_alignment:"left"
     });
-
-    googleNote.textContent = "Sign in securely with your Google account.";
-  } catch (error) {
-    console.error("Google sign-in initialization error:",error);
-    googleNote.textContent = "Google sign-in could not be initialized. Check the Google OAuth settings.";
+    if(location.hostname==="zavo-store.pages.dev")googleNote.textContent="Sign in securely with your Google account.";
+  }catch(error){
+    console.error("Google initialization error:",error);
+    googleNote.textContent="Google sign-in could not be initialized. Check that this website address is authorized in Google Cloud.";
   }
 }
-
-async function handleGoogleCredential(googleResponse) {
-  accountMessage.textContent = "Verifying your Google sign-in…";
-
-  try {
-    if (!googleResponse?.credential) {
-      throw new Error("Google did not return a valid sign-in credential.");
-    }
-
-    const result = await accountRequest("google",{credential:googleResponse.credential});
-
-    if (!result.success || !result.token) {
-      throw new Error("ZAVO did not return a valid login session.");
-    }
-
+async function handleGoogleCredential(googleResponse){
+  clearMessages();
+  showMessage("Checking your Google sign-in…");
+  try{
+    if(!googleResponse?.credential)throw new Error("Google did not provide a sign-in credential. Please try again.");
+    const result=await accountRequest("google",{credential:googleResponse.credential});
+    if(!result.success||!result.token)throw new Error("ZAVO did not return a valid login session. Please try again.");
     sessionStorage.setItem("zavoToken",result.token);
-    registerForm.reset();
-    loginForm.reset();
-    registerForm.hidden = true;
-    loginForm.hidden = true;
-    signedInPanel.hidden = false;
-    accountTitle.textContent = "You're logged in";
-    accountIntro.textContent = "You can continue browsing products.";
-    signedInMessage.textContent = `Welcome, ${result.user?.full_name || "ZAVO customer"}.`;
-    accountMessage.textContent = "Google sign-in successful.";
-    updateLoginButton(true);
-  } catch (error) {
+    registerForm.reset();loginForm.reset();
+    registerForm.hidden=true;loginForm.hidden=true;signedInPanel.hidden=false;
+    accountTitle.textContent="You're logged in";
+    accountIntro.textContent="You can continue browsing products.";
+    signedInMessage.textContent=`Welcome, ${result.user?.full_name||"ZAVO customer"}.`;
+    showMessage("Google sign-in successful.","success");updateLoginButton(true);
+  }catch(error){
     console.error("ZAVO Google sign-in error:",error);
-    accountMessage.textContent = error.message || "Google sign-in failed. Please try again.";
+    if(error.status===409){
+      showMessage("A ZAVO account already exists with this Google email. Log in using that account first. Linking Google to an existing account is not enabled yet.","error");
+    }else if(error.status===401){
+      showMessage("Google could not verify this sign-in. Try again, or log in using your ZAVO email and password.","error");
+    }else{
+      showMessage(networkMessage(error,"complete Google sign-in"),"error");
+    }
   }
 }
-
+async function checkSavedAccount(){
+  if(!token())return;
+  try{await accountRequest("me",null,token());updateLoginButton(true)}
+  catch{sessionStorage.removeItem("zavoToken");updateLoginButton(false)}
+}
 checkSavedAccount();
-
-/* Wait for Google's script to load, then render the button. */
 window.addEventListener("load",initializeGoogleSignIn);
-
-/* Re-render the Google button after screen rotation or resizing. */
-let googleResizeTimeout;
-window.addEventListener("resize",() => {
-  clearTimeout(googleResizeTimeout);
-  googleResizeTimeout = setTimeout(() => {
-    if (window.google?.accounts?.id && panel.classList.contains("open")) {
-      initializeGoogleSignIn();
-    }
-  },200);
+window.addEventListener("resize",()=>{
+  if(window.google?.accounts?.id&&panel.classList.contains("open"))initializeGoogleSignIn();
 });
 </script>
 </body>
