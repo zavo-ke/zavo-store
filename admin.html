@@ -1,10 +1,13 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#174ea6">
+  <meta name="description" content="Secure ZAVO marketplace administration.">
   <title>ZAVO Admin | Marketplace Management</title>
+
   <style>
     :root {
       --blue: #174ea6;
@@ -40,7 +43,6 @@
 
     header h1 { margin: 0 0 5px; font-size: 25px; }
     header p { margin: 0; font-size: 14px; opacity: .9; }
-
     main { padding: 16px; }
 
     .panel {
@@ -109,11 +111,11 @@
       margin: 10px 0;
       font-size: 14px;
       overflow-wrap: anywhere;
+      line-height: 1.5;
     }
 
     .status.error { background: #fee4e2; color: #912018; }
     .status.ok { background: #d1fadf; color: #05603a; }
-
     .hidden { display: none !important; }
 
     .item {
@@ -126,7 +128,8 @@
     }
 
     .item-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
-    .meta { font-size: 13px; line-height: 1.6; color: #475569; }
+    .meta { font-size: 13px; line-height: 1.7; color: #475569; }
+
     .pill {
       display: inline-block;
       border-radius: 20px;
@@ -149,15 +152,21 @@
     .top-actions { display: flex; flex-wrap: wrap; gap: 6px; }
     .top-actions button { flex: 1; min-width: 120px; }
 
+    .small-button { padding: 8px 10px; }
+    .section-heading { margin-top: 0; }
+    .help-link { color: var(--blue); font-weight: 700; }
+
     @media (max-width: 560px) {
       main { padding: 10px; }
       .panel { padding: 13px; }
       .grid { grid-template-columns: 1fr; }
       .wide { grid-column: auto; }
       header h1 { font-size: 22px; }
+      button, .link-button { max-width: 100%; }
     }
   </style>
 </head>
+
 <body>
 <header>
   <div class="head-inner">
@@ -168,49 +177,71 @@
 
 <main>
   <section class="panel">
-    <h2>Secure administrator connection</h2>
+    <h2>Administrator connection</h2>
     <p class="muted">
-      Sign in to ZAVO first. Enter the session token returned by the login API.
-      This page does not ask for or store your password.
+      This page checks your existing ZAVO login automatically. You must sign
+      in with an account that has the administrator role. Customers cannot
+      access administrator controls.
     </p>
-    <label for="apiToken">Administrator session token</label>
-    <input id="apiToken" type="password" autocomplete="off"
-      placeholder="Paste your session token here">
-    <div class="top-actions">
-      <button id="connectBtn" onclick="connectAdmin()">Connect and verify admin</button>
-      <button class="secondary" onclick="forgetToken()">Forget token</button>
+
+    <div id="connectionStatus" class="status">
+      Checking for your existing login…
     </div>
-    <div id="connectionStatus" class="status">Not connected.</div>
+
+    <div id="manualConnection">
+      <label for="apiToken">Session token (only if automatic connection fails)</label>
+      <input id="apiToken" type="password" autocomplete="off"
+        placeholder="Paste your session token here">
+
+      <div class="top-actions">
+        <button id="connectBtn" type="button">Connect and verify admin</button>
+        <button id="forgetBtn" class="secondary" type="button">Forget this session</button>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <a class="link-button" href="./index.html">Return to storefront / sign in</a>
+      <button id="retryBtn" class="secondary" type="button">Check session again</button>
+    </div>
   </section>
 
   <section id="workspace" class="hidden">
-    <div class="panel">
+    <section class="panel">
+      <h2 class="section-heading">Administrator workspace</h2>
+      <p id="adminIdentity" class="muted"></p>
+
       <div class="tabs">
-        <button id="tabProducts" class="active" onclick="showTab('products')">Products</button>
-        <button id="tabVendors" onclick="showTab('vendors')">Seller accounts</button>
+        <button id="tabProducts" class="active" type="button">Products</button>
+        <button id="tabVendors" type="button">Seller accounts</button>
       </div>
+
       <div id="globalStatus" class="status hidden"></div>
-    </div>
+    </section>
 
     <section id="productsSection">
       <div class="panel">
         <h2 id="productFormTitle">Add a product</h2>
         <p class="muted">
-          Prices are entered in the selected currency. KES 1,500 is saved as
-          150000 minor units. New listings are drafts unless you select Published.
+          Enter prices in the selected currency. For example, KES 1,500 is
+          stored as 150000 minor units. Publishing requires a suitable active
+          vendor profile in the backend.
         </p>
+
         <form id="productForm">
           <input id="productId" type="hidden">
+
           <div class="grid">
             <div class="wide">
               <label for="productTitle">Product title *</label>
               <input id="productTitle" maxlength="200" required>
             </div>
+
             <div>
               <label for="productCategory">Category *</label>
-              <input id="productCategory" maxlength="100" required
-                placeholder="e.g. Electronics">
+              <input id="productCategory" maxlength="100"
+                placeholder="e.g. Electronics" required>
             </div>
+
             <div>
               <label for="productCurrency">Currency</label>
               <select id="productCurrency">
@@ -218,34 +249,45 @@
                 <option value="USD">USD — US dollar</option>
               </select>
             </div>
+
             <div>
               <label for="productPrice">Selling price *</label>
-              <input id="productPrice" type="number" min="0" step="0.01" required>
+              <input id="productPrice" type="number" min="0"
+                step="0.01" required>
             </div>
+
             <div>
               <label for="productCost">Source cost</label>
-              <input id="productCost" type="number" min="0" step="0.01" value="0">
+              <input id="productCost" type="number" min="0"
+                step="0.01" value="0">
             </div>
+
             <div>
               <label for="productStock">Available stock *</label>
-              <input id="productStock" type="number" min="0" step="1" value="1" required>
+              <input id="productStock" type="number" min="0"
+                step="1" value="1" required>
             </div>
+
             <div>
               <label for="productSku">SKU / stock code</label>
               <input id="productSku" maxlength="100">
             </div>
+
             <div class="wide">
               <label for="productDescription">Description</label>
               <textarea id="productDescription"></textarea>
             </div>
+
             <div>
               <label for="productCountry">Country of origin</label>
               <input id="productCountry" maxlength="100">
             </div>
+
             <div>
               <label for="productReturn">Return policy</label>
               <input id="productReturn" maxlength="500">
             </div>
+
             <div>
               <label for="productStatus">Listing status</label>
               <select id="productStatus">
@@ -253,22 +295,28 @@
                 <option value="published">Published — eligible to display</option>
               </select>
             </div>
+
             <div>
               <label for="productVendor">Vendor profile ID (optional)</label>
-              <input id="productVendor" placeholder="Blank uses first active vendor">
+              <input id="productVendor"
+                placeholder="Blank uses first active vendor">
             </div>
           </div>
+
           <div class="top-actions" style="margin-top:12px">
             <button id="saveProductBtn" type="submit">Save product</button>
-            <button type="button" class="secondary" onclick="resetProductForm()">Clear form</button>
-            <button type="button" class="secondary" onclick="loadProducts()">Refresh products</button>
+            <button id="clearProductBtn" type="button" class="secondary">Clear form</button>
+            <button id="refreshProductsBtn" type="button" class="secondary">Refresh products</button>
           </div>
         </form>
       </div>
 
       <div class="panel">
         <h2>Marketplace products</h2>
-        <p class="muted">Edit listings, change visibility or delete a listing when necessary.</p>
+        <p class="muted">
+          Edit listings, publish or unpublish products, and delete eligible
+          listings. The backend must protect products linked to order history.
+        </p>
         <div id="productsList">Connect as administrator to load products.</div>
       </div>
     </section>
@@ -277,12 +325,25 @@
       <div class="panel">
         <h2>Seller and supplier accounts</h2>
         <p class="muted">
-          Approve legitimate applications. Give a warning with a reason, suspend
-          an account, restore a suspended account or ban an account for serious
-          or repeated violations.
+          Approve, warn, suspend or restore seller accounts. A warning,
+          suspension or ban attempt requires a reason. Ban is disabled until
+          the backend and database support a distinct banned status safely.
         </p>
-        <button onclick="loadVendors()">Refresh seller accounts</button>
+        <button id="refreshVendorsBtn" type="button">Refresh seller accounts</button>
         <div id="vendorsList">Connect as administrator to load seller accounts.</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Orders and payments</h2>
+      <p class="muted">
+        Your database contains order and payment tables, but order-management
+        and payment routes must be added and tested in the Worker before this
+        dashboard can safely show orders or confirm payments.
+      </p>
+      <div class="status">
+        Order dashboard: not connected yet. No payment is marked successful
+        by this page.
       </div>
     </section>
   </section>
@@ -290,24 +351,29 @@
   <section class="panel">
     <h3>Administrator safety</h3>
     <div class="danger-note">
-      Product deletion is permanent for the product database record and its
-      media records. It does not remove files stored in external image/video
-      storage or delete related order history.
+      Deleting a product is permanent. The backend should refuse deletion if
+      order items refer to that product. Archive or unpublish such products
+      instead. External image/video files are not automatically removed by
+      deleting a database record.
     </div>
     <p class="muted">
-      Never share your session token. If the token expires, log in again and
-      provide the new token. Do not use ban or delete controls as a test.
+      Never share a session token or place one in a URL. If your session
+      expires, sign in again. Do not use destructive actions as tests.
     </p>
     <a class="link-button" href="./index.html">Return to storefront</a>
   </section>
 </main>
 
 <script>
-  const API = "https://zavo-api.owinosylvester2025.workers.dev";
+  "use strict";
 
+  const API = "https://zavo-api.owinosylvester2025.workers.dev";
+  const TOKEN_KEY = "zavoToken";
   const $ = id => document.getElementById(id);
+
   let token = "";
   let productsCache = [];
+  let adminVerified = false;
 
   function setStatus(id, message, type = "") {
     const el = $(id);
@@ -318,8 +384,11 @@
 
   function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, char => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;",
-      '"': "&quot;", "'": "&#39;"
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
     }[char]));
   }
 
@@ -332,69 +401,131 @@
   }
 
   async function api(path, options = {}) {
-    const headers = {
-      "Content-Type": "application/json",
-      ...(token ? { "Authorization": "Bearer " + token } : {}),
-      ...(options.headers || {})
-    };
+    if (!token) throw new Error("No session token. Please sign in again.");
 
-    const response = await fetch(API + path, {
-      ...options,
-      headers
-    });
+    let response;
+
+    try {
+      response = await fetch(API + path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token,
+          ...(options.headers || {})
+        }
+      });
+    } catch {
+      throw new Error(
+        "Could not reach the ZAVO API. Check your internet connection and confirm the Cloudflare Worker is deployed."
+      );
+    }
 
     let data;
+
     try {
       data = await response.json();
     } catch {
-      throw new Error("The server returned an unreadable response.");
+      throw new Error(
+        "The API returned a response that was not JSON. Check the deployed Worker."
+      );
     }
 
     if (!response.ok || data.success === false) {
-      throw new Error(data.error || "The request failed.");
+      const message = data.error || data.message ||
+        ("API request failed with HTTP " + response.status);
+
+      if (response.status === 401 || response.status === 403) {
+        adminVerified = false;
+      }
+
+      throw new Error(message);
     }
 
     return data;
   }
 
-  async function connectAdmin() {
-    token = $("apiToken").value.trim();
+  async function connectAdmin(suppliedToken = "") {
+    const entered = $("apiToken").value.trim();
+    token = suppliedToken || entered || sessionStorage.getItem(TOKEN_KEY) || "";
 
     if (!token) {
-      setStatus("connectionStatus", "Paste your session token first.", "error");
+      adminVerified = false;
+      $("workspace").classList.add("hidden");
+      setStatus(
+        "connectionStatus",
+        "No saved login found. Return to the storefront, sign in with your administrator account, then open this page in the same tab.",
+        "error"
+      );
       return;
     }
 
     $("connectBtn").disabled = true;
+    $("retryBtn").disabled = true;
+    setStatus("connectionStatus", "Verifying your account…");
 
     try {
       const data = await api("/api/auth/me");
-      if (!data.user || !Array.isArray(data.user.roles) ||
-          !data.user.roles.includes("admin")) {
-        throw new Error("This account does not have the administrator role.");
+      const user = data.user;
+
+      if (!user || !Array.isArray(user.roles) ||
+          !user.roles.includes("admin")) {
+        throw new Error(
+          "This account does not have the administrator role. Sign in with your ZAVO administrator account."
+        );
       }
+
+      adminVerified = true;
+      sessionStorage.setItem(TOKEN_KEY, token);
+      $("apiToken").value = "";
+      $("manualConnection").classList.add("hidden");
+      $("workspace").classList.remove("hidden");
+      $("adminIdentity").textContent =
+        "Verified administrator: " + (user.email || "Admin account");
 
       setStatus(
         "connectionStatus",
-        "Verified administrator: " + data.user.email,
+        "Administrator verified successfully.",
         "ok"
       );
 
-      $("workspace").classList.remove("hidden");
-      await Promise.all([loadProducts(), loadVendors()]);
+      showTab("products");
+
+      const results = await Promise.allSettled([
+        loadProducts(),
+        loadVendors()
+      ]);
+
+      const failed = results.filter(item => item.status === "rejected");
+
+      if (failed.length) {
+        setStatus(
+          "globalStatus",
+          "Your admin login is valid, but one or more dashboard sections failed to load. Check the error shown in each section.",
+          "error"
+        );
+      }
     } catch (error) {
+      adminVerified = false;
       $("workspace").classList.add("hidden");
+      $("manualConnection").classList.remove("hidden");
       setStatus("connectionStatus", error.message, "error");
     } finally {
       $("connectBtn").disabled = false;
+      $("retryBtn").disabled = false;
     }
   }
 
   function forgetToken() {
     token = "";
+    adminVerified = false;
+    sessionStorage.removeItem(TOKEN_KEY);
     $("apiToken").value = "";
     $("workspace").classList.add("hidden");
-    setStatus("connectionStatus", "Token cleared from this page.");
+    $("manualConnection").classList.remove("hidden");
+    setStatus(
+      "connectionStatus",
+      "The saved session token has been cleared from this browser tab."
+    );
   }
 
   function showTab(tab) {
@@ -404,44 +535,84 @@
     $("tabVendors").classList.toggle("active", tab === "vendors");
   }
 
+  function requireAdmin() {
+    if (!adminVerified || !token) {
+      throw new Error("Administrator session is not verified. Sign in again.");
+    }
+  }
+
   async function loadProducts() {
     $("productsList").textContent = "Loading products…";
 
     try {
+      requireAdmin();
       const data = await api("/api/admin/products");
-      productsCache = data.products || [];
+      productsCache = Array.isArray(data.products) ? data.products : [];
 
       if (!productsCache.length) {
         $("productsList").textContent = "No products found.";
         return;
       }
 
-      $("productsList").innerHTML = productsCache.map(p => `
-        <article class="item">
-          <div class="item-title">${escapeHTML(p.title)}</div>
-          <span class="pill">${escapeHTML(p.status)}</span>
-          <span class="pill">${escapeHTML(p.category)}</span>
-          <div class="meta">
-            Selling price: <b>${escapeHTML(money(p.price_minor, p.currency))}</b><br>
-            Source cost: ${escapeHTML(money(p.cost_minor, p.currency))}<br>
-            Stock: ${escapeHTML(p.stock)}<br>
-            Vendor: ${escapeHTML(p.store_name || "Unknown vendor")}<br>
-            Vendor status: ${escapeHTML(p.vendor_status || "Unknown")}<br>
-            Product ID: ${escapeHTML(p.id)}
-          </div>
-          <button onclick="editProduct('${escapeHTML(p.id)}')">Edit</button>
-          <button class="secondary"
-            onclick="changeProductStatus('${escapeHTML(p.id)}',
-              '${p.status === "published" ? "draft" : "published"}')">
-            ${p.status === "published" ? "Unpublish" : "Publish"}
-          </button>
-          <button class="danger" onclick="deleteProduct('${escapeHTML(p.id)}')">
-            Delete listing
-          </button>
-        </article>
-      `).join("");
+      $("productsList").replaceChildren();
+
+      for (const p of productsCache) {
+        const card = document.createElement("article");
+        card.className = "item";
+
+        const title = document.createElement("div");
+        title.className = "item-title";
+        title.textContent = p.title || "Untitled product";
+        card.appendChild(title);
+
+        const pills = document.createElement("div");
+        pills.innerHTML =
+          '<span class="pill">' + escapeHTML(p.status) + '</span>' +
+          '<span class="pill">' + escapeHTML(p.category) + '</span>';
+        card.appendChild(pills);
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent =
+          "Selling price: " + money(p.price_minor, p.currency) + "\n" +
+          "Source cost: " + money(p.cost_minor, p.currency) + "\n" +
+          "Stock: " + (p.stock ?? 0) + "\n" +
+          "Vendor: " + (p.store_name || "Unknown vendor") + "\n" +
+          "Vendor status: " + (p.vendor_status || "Unknown") + "\n" +
+          "Product ID: " + (p.id || "Unknown");
+        meta.style.whiteSpace = "pre-line";
+        card.appendChild(meta);
+
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.textContent = "Edit";
+        edit.addEventListener("click", () => editProduct(p.id));
+        card.appendChild(edit);
+
+        const visibility = document.createElement("button");
+        visibility.type = "button";
+        visibility.className = "secondary";
+        visibility.textContent =
+          p.status === "published" ? "Unpublish" : "Publish";
+        visibility.addEventListener("click", () =>
+          changeProductStatus(
+            p.id,
+            p.status === "published" ? "draft" : "published"
+          )
+        );
+        card.appendChild(visibility);
+
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "danger";
+        del.textContent = "Delete listing";
+        del.addEventListener("click", () => deleteProduct(p.id));
+        card.appendChild(del);
+
+        $("productsList").appendChild(card);
+      }
     } catch (error) {
-      $("productsList").textContent = error.message;
+      $("productsList").textContent = "Could not load products: " + error.message;
     }
   }
 
@@ -449,7 +620,7 @@
     const p = productsCache.find(item => item.id === id);
     if (!p) return;
 
-    $("productId").value = p.id;
+    $("productId").value = p.id || "";
     $("productTitle").value = p.title || "";
     $("productCategory").value = p.category || "";
     $("productCurrency").value = p.currency || "KES";
@@ -460,9 +631,11 @@
     $("productDescription").value = p.description || "";
     $("productCountry").value = p.country_of_origin || "";
     $("productReturn").value = p.return_policy || "";
-    $("productStatus").value = p.status || "draft";
+    $("productStatus").value =
+      ["draft", "published"].includes(p.status) ? p.status : "draft";
     $("productVendor").value = p.vendor_id || "";
     $("productFormTitle").textContent = "Edit product";
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -477,78 +650,97 @@
 
   function toMinorUnits(value) {
     const number = Number(value);
+
     if (!Number.isFinite(number) || number < 0) {
       throw new Error("Enter valid non-negative prices.");
     }
+
     const minor = Math.round(number * 100);
-    if (!Number.isSafeInteger(minor)) throw new Error("The price is too large.");
+
+    if (!Number.isSafeInteger(minor)) {
+      throw new Error("The price is too large.");
+    }
+
     return minor;
   }
 
   $("productForm").addEventListener("submit", async event => {
     event.preventDefault();
 
-    const id = $("productId").value.trim();
-    const payload = {
-      title: $("productTitle").value.trim(),
-      category: $("productCategory").value.trim(),
-      currency: $("productCurrency").value,
-      price_minor: toMinorUnits($("productPrice").value),
-      cost_minor: toMinorUnits($("productCost").value || "0"),
-      stock: Number($("productStock").value),
-      sku: $("productSku").value.trim(),
-      description: $("productDescription").value.trim(),
-      country_of_origin: $("productCountry").value.trim(),
-      return_policy: $("productReturn").value.trim(),
-      status: $("productStatus").value,
-      vendor_id: $("productVendor").value.trim()
-    };
-
-    if (!Number.isSafeInteger(payload.stock) || payload.stock < 0) {
-      setStatus("globalStatus", "Stock must be a non-negative whole number.", "error");
-      return;
-    }
-
-    $("saveProductBtn").disabled = true;
-
     try {
-      let result;
+      requireAdmin();
 
-      if (id) {
-        result = await api("/api/admin/products/update", {
-          method: "POST",
-          body: JSON.stringify({ id, ...payload })
-        });
+      const id = $("productId").value.trim();
+      const payload = {
+        title: $("productTitle").value.trim(),
+        category: $("productCategory").value.trim(),
+        currency: $("productCurrency").value,
+        price_minor: toMinorUnits($("productPrice").value),
+        cost_minor: toMinorUnits($("productCost").value || "0"),
+        stock: Number($("productStock").value),
+        sku: $("productSku").value.trim(),
+        description: $("productDescription").value.trim(),
+        country_of_origin: $("productCountry").value.trim(),
+        return_policy: $("productReturn").value.trim(),
+        status: $("productStatus").value,
+        vendor_id: $("productVendor").value.trim()
+      };
 
-        if (payload.status !== "draft" && payload.status !== "published") {
-          throw new Error("Invalid product status.");
-        }
-
-        await api("/api/admin/products/status", {
-          method: "POST",
-          body: JSON.stringify({ id, status: payload.status })
-        });
-      } else {
-        result = await api("/api/admin/products", {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
+      if (!payload.title || !payload.category) {
+        throw new Error("Product title and category are required.");
       }
 
-      setStatus("globalStatus", result.message || "Product saved.", "ok");
-      resetProductForm();
-      await loadProducts();
+      if (!Number.isSafeInteger(payload.stock) || payload.stock < 0) {
+        throw new Error("Stock must be a non-negative whole number.");
+      }
+
+      if (!["draft", "published"].includes(payload.status)) {
+        throw new Error("Choose Draft or Published.");
+      }
+
+      $("saveProductBtn").disabled = true;
+      let result;
+
+      try {
+        if (id) {
+          result = await api("/api/admin/products/update", {
+            method: "POST",
+            body: JSON.stringify({ id, ...payload })
+          });
+
+          await api("/api/admin/products/status", {
+            method: "POST",
+            body: JSON.stringify({ id, status: payload.status })
+          });
+        } else {
+          result = await api("/api/admin/products", {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+        }
+
+        setStatus(
+          "globalStatus",
+          result.message || "Product saved. Refreshing list…",
+          "ok"
+        );
+
+        resetProductForm();
+        await loadProducts();
+      } finally {
+        $("saveProductBtn").disabled = false;
+      }
     } catch (error) {
       setStatus("globalStatus", error.message, "error");
-    } finally {
-      $("saveProductBtn").disabled = false;
     }
   });
 
   async function changeProductStatus(id, status) {
+    if (!adminVerified) return;
+
     const message = status === "published"
-      ? "Publish this product? It will be eligible to appear in the storefront."
-      : "Unpublish this product? Customers will no longer see it.";
+      ? "Publish this product? It may become visible in the storefront if the vendor is active and stock is available."
+      : "Unpublish this product? Customers should no longer see it.";
 
     if (!confirm(message)) return;
 
@@ -558,7 +750,7 @@
         body: JSON.stringify({ id, status })
       });
 
-      setStatus("globalStatus", result.message, "ok");
+      setStatus("globalStatus", result.message || "Product status updated.", "ok");
       await loadProducts();
     } catch (error) {
       setStatus("globalStatus", error.message, "error");
@@ -566,15 +758,20 @@
   }
 
   async function deleteProduct(id) {
+    if (!adminVerified) return;
+
     const p = productsCache.find(item => item.id === id);
     const title = p ? p.title : id;
 
     if (!confirm(
       "PERMANENT ACTION\n\nDelete this product listing?\n\n" +
-      title + "\n\nIts product-media database records will also be deleted."
+      title +
+      "\n\nThe server must reject this if order history refers to the product."
     )) return;
 
-    if (!confirm("Confirm again: permanently delete this listing?")) return;
+    if (!confirm("Confirm again: attempt to permanently delete this listing?")) {
+      return;
+    }
 
     try {
       const result = await api("/api/admin/products/delete", {
@@ -582,10 +779,19 @@
         body: JSON.stringify({ id })
       });
 
-      setStatus("globalStatus", result.message, "ok");
+      setStatus(
+        "globalStatus",
+        result.message || "Delete request completed.",
+        "ok"
+      );
       await loadProducts();
     } catch (error) {
-      setStatus("globalStatus", error.message, "error");
+      setStatus(
+        "globalStatus",
+        "The product was not confirmed deleted. " + error.message +
+        " If it has order history, archive or unpublish it instead.",
+        "error"
+      );
     }
   }
 
@@ -593,59 +799,86 @@
     $("vendorsList").textContent = "Loading seller accounts…";
 
     try {
+      requireAdmin();
       const data = await api("/api/admin/vendors");
-      const vendors = data.vendors || [];
+      const vendors = Array.isArray(data.vendors) ? data.vendors : [];
 
       if (!vendors.length) {
         $("vendorsList").textContent = "No seller profiles found.";
         return;
       }
 
-      $("vendorsList").innerHTML = vendors.map(v => `
-        <article class="item">
-          <div class="item-title">${escapeHTML(v.store_name || "Unnamed store")}</div>
-          <span class="pill">Vendor: ${escapeHTML(v.vendor_status)}</span>
-          <span class="pill">User: ${escapeHTML(v.account_status || "Unknown")}</span>
-          <div class="meta">
-            Contact: ${escapeHTML(v.full_name || "Not provided")}<br>
-            Email: ${escapeHTML(v.email || "Not provided")}<br>
-            Country: ${escapeHTML(v.country || "Not provided")}<br>
-            Vendor ID: ${escapeHTML(v.vendor_id)}<br>
-            User ID: ${escapeHTML(v.user_id || "Not linked")}
-          </div>
-          <button class="success" onclick="vendorAction('${escapeHTML(v.vendor_id)}','approve')">
-            Approve
-          </button>
-          <button class="warning" onclick="vendorAction('${escapeHTML(v.vendor_id)}','warn')">
-            Issue warning
-          </button>
-          <button class="danger" onclick="vendorAction('${escapeHTML(v.vendor_id)}','suspend')">
-            Suspend
-          </button>
-          <button class="secondary" onclick="vendorAction('${escapeHTML(v.vendor_id)}','restore')">
-            Restore
-          </button>
-          <button class="danger" onclick="vendorAction('${escapeHTML(v.vendor_id)}','ban')">
-            Ban account
-          </button>
-        </article>
-      `).join("");
+      $("vendorsList").replaceChildren();
+
+      for (const v of vendors) {
+        const card = document.createElement("article");
+        card.className = "item";
+
+        const title = document.createElement("div");
+        title.className = "item-title";
+        title.textContent = v.store_name || "Unnamed store";
+        card.appendChild(title);
+
+        const pills = document.createElement("div");
+        pills.innerHTML =
+          '<span class="pill">Vendor: ' + escapeHTML(v.vendor_status || "Unknown") + '</span>' +
+          '<span class="pill">User: ' + escapeHTML(v.account_status || "Unknown") + '</span>';
+        card.appendChild(pills);
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent =
+          "Contact: " + (v.full_name || "Not provided") + "\n" +
+          "Email: " + (v.email || "Not provided") + "\n" +
+          "Country: " + (v.country || "Not provided") + "\n" +
+          "Vendor ID: " + (v.vendor_id || "Not provided") + "\n" +
+          "User ID: " + (v.user_id || "Not linked");
+        meta.style.whiteSpace = "pre-line";
+        card.appendChild(meta);
+
+        addVendorButton(card, "Approve", "success", v.vendor_id, "approve");
+        addVendorButton(card, "Issue warning", "warning", v.vendor_id, "warn");
+        addVendorButton(card, "Suspend", "danger", v.vendor_id, "suspend");
+        addVendorButton(card, "Restore", "secondary", v.vendor_id, "restore");
+
+        const ban = document.createElement("button");
+        ban.type = "button";
+        ban.className = "danger";
+        ban.textContent = "Ban unavailable";
+        ban.disabled = true;
+        ban.title =
+          "The current database does not allow a distinct banned status. Fix the backend before enabling this action.";
+        card.appendChild(ban);
+
+        $("vendorsList").appendChild(card);
+      }
     } catch (error) {
-      $("vendorsList").textContent = error.message;
+      $("vendorsList").textContent =
+        "Could not load seller accounts: " + error.message;
     }
   }
 
+  function addVendorButton(card, label, style, vendorId, action) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = label;
+    button.className = style;
+    button.addEventListener("click", () => vendorAction(vendorId, action));
+    card.appendChild(button);
+  }
+
   async function vendorAction(vendorId, action) {
+    if (!adminVerified || !vendorId) return;
+
     let reason = "";
 
-    if (["warn", "suspend", "ban"].includes(action)) {
+    if (["warn", "suspend"].includes(action)) {
       reason = prompt(
         "Enter the reason for this " + action +
-        ". This reason will be recorded in the administrator log:"
+        ". This should be recorded in the administrator log:"
       );
 
       if (reason === null) return;
-
       reason = reason.trim();
 
       if (!reason) {
@@ -657,9 +890,8 @@
     const messages = {
       approve: "Approve this seller account?",
       warn: "Record this warning?",
-      suspend: "Suspend this seller? Their sessions will be revoked and listings hidden.",
-      restore: "Restore this seller account?",
-      ban: "Ban this seller? Their sessions will be revoked and listings hidden."
+      suspend: "Suspend this seller? Their sessions should be revoked and listings hidden.",
+      restore: "Restore this seller account?"
     };
 
     if (!confirm(messages[action] || "Continue?")) return;
@@ -674,13 +906,36 @@
         })
       });
 
-      setStatus("globalStatus", result.message, "ok");
-      await loadVendors();
-      await loadProducts();
+      setStatus("globalStatus", result.message || "Seller action completed.", "ok");
+      await Promise.all([loadVendors(), loadProducts()]);
     } catch (error) {
       setStatus("globalStatus", error.message, "error");
     }
   }
+
+  $("connectBtn").addEventListener("click", () => connectAdmin());
+  $("retryBtn").addEventListener("click", () =>
+    connectAdmin(sessionStorage.getItem(TOKEN_KEY) || "")
+  );
+  $("forgetBtn").addEventListener("click", forgetToken);
+  $("tabProducts").addEventListener("click", () => showTab("products"));
+  $("tabVendors").addEventListener("click", () => showTab("vendors"));
+  $("clearProductBtn").addEventListener("click", resetProductForm);
+  $("refreshProductsBtn").addEventListener("click", loadProducts);
+  $("refreshVendorsBtn").addEventListener("click", loadVendors);
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const savedToken = sessionStorage.getItem(TOKEN_KEY);
+
+    if (savedToken) {
+      connectAdmin(savedToken);
+    } else {
+      setStatus(
+        "connectionStatus",
+        "No saved session found. Sign in on the storefront, then open this admin page in the same tab."
+      );
+    }
+  });
 </script>
 </body>
-  </html>
+</html>
