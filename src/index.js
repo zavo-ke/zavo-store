@@ -1,4 +1,3 @@
-
 const ALLOWED_ORIGINS = new Set([
   "https://zavo-store.pages.dev",
   "https://zavo-ke.github.io"
@@ -198,10 +197,7 @@ async function verifyGoogleCredential(credential) {
   const publicKey = await crypto.subtle.importKey(
     "jwk",
     jwk,
-    {
-      name: "RSASSA-PKCS1-v1_5",
-      hash: "SHA-256"
-    },
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
     false,
     ["verify"]
   );
@@ -221,10 +217,7 @@ async function verifyGoogleCredential(credential) {
 }
 
 async function createSession(db, userId) {
-  const token = base64url(
-    crypto.getRandomValues(new Uint8Array(32))
-  );
-
+  const token = base64url(crypto.getRandomValues(new Uint8Array(32)));
   const tokenHash = await sha256(token);
 
   const expiresAt = new Date(
@@ -241,9 +234,7 @@ async function createSession(db, userId) {
   ).bind(userId).all();
 
   const user = await db.prepare(`
-    SELECT id, full_name, email
-    FROM users
-    WHERE id = ?
+    SELECT id, full_name, email FROM users WHERE id = ?
   `).bind(userId).first();
 
   return {
@@ -271,10 +262,7 @@ async function getSession(request, db) {
     FROM auth_sessions s
     JOIN users u ON u.id = s.user_id
     WHERE s.token_hash = ? AND s.expires_at > ?
-  `).bind(
-    await sha256(token),
-    new Date().toISOString()
-  ).first();
+  `).bind(await sha256(token), new Date().toISOString()).first();
 
   if (!result || result.status !== "active") return null;
 
@@ -290,20 +278,110 @@ async function getSession(request, db) {
   };
 }
 
+async function requireAdmin(request, db) {
+  const user = await getSession(request, db);
+
+  if (!user) {
+    return {
+      ok: false,
+      status: 401,
+      error: "Please log in with your administrator account."
+    };
+  }
+
+  const isAdmin = user.roles.includes("admin");
+
+  if (!isAdmin) {
+    return {
+      ok: false,
+      status: 403,
+      error: "Access denied. Administrator permission is required."
+    };
+  }
+
+  return { ok: true, user };
+}
+
+async function readBody(request) {
+  try {
+    const body = await request.json();
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return null;
+    }
+    return body;
+  } catch {
+    return null;
+  }
+}
+
+function makeSlug(value) {
+  return String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 100);
+}
+
+async function ensureAuditTable(db) {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id TEXT PRIMARY KEY,
+      actor_user_id TEXT,
+      action TEXT NOT NULL,
+      target_type TEXT NOT NULL,
+      target_id TEXT,
+      details TEXT NOT NULL DEFAULT '{}',
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `).run();
+}
+
+async function logAdminAction(db, adminId, action, targetType, targetId, details = {}) {
+  try {
+    await ensureAuditTable(db);
+
+    await db.prepare(`
+      INSERT INTO audit_logs
+        (id, actor_user_id, action, target_type, target_id, details)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).bind(
+      crypto.randomUUID(),
+      adminId,
+      action,
+      targetType,
+      targetId || null,
+      JSON.stringify(details)
+    ).run();
+  } catch (error) {
+    // Do not hide a successful main action because logging failed.
+    console.error("Admin audit logging failed:", error?.message || "Unknown error");
+  }
+}
+
+async function getAdmin(request, db, json) {
+  const auth = await requireAdmin(request, db);
+
+  if (!auth.ok) {
+    return {
+      user: null,
+      response: json({ success: false, error: auth.error }, auth.status)
+    };
+  }
+
+  return { user: auth.user, response: null };
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const path = url.pathname;
     const origin = request.headers.get("Origin");
-
     const json = (data, status = 200) => response(data, status, origin);
 
     if (request.method === "OPTIONS") {
       if (origin && !ALLOWED_ORIGINS.has(origin)) {
-        return new Response(null, {
-          status: 403,
-          headers: BASE_HEADERS
-        });
+        return new Response(null, { status: 403, headers: BASE_HEADERS });
       }
 
       const headers = new Headers(BASE_HEADERS);
@@ -316,27 +394,32 @@ export default {
 
     if (origin && !ALLOWED_ORIGINS.has(origin)) {
       return json({
+        success: false,
         error: "This website is not authorised to connect to the ZAVO API."
       }, 403);
     }
 
     if (!env.DB) {
       return json({
-        error: "The ZAVO database is not connected. Please try again later."
+        success: false,
+        error: "The ZAVO database is not connected."
       }, 500);
     }
+
+    const db = env.DB;
 
     try {
       if (path === "/" || path === "/api/health") {
         return json({ status: "ok", service: "zavo-api" });
       }
 
+      // ---------------------------------------------------------
+      // CUSTOMER REGISTRATION
+      // ---------------------------------------------------------
       if (path === "/api/auth/register" && request.method === "POST") {
-        let body;
+        const body = await readBody(request);
 
-        try {
-          body = await request.json();
-        } catch {
+        if (!body) {
           return json({ error: "Please check the form and submit it again." }, 400);
         }
 
@@ -345,24 +428,18 @@ export default {
         const password = String(body.password || "");
 
         if (fullName.length < 2 || fullName.length > 100) {
-          return json({
-            error: "Enter your full name using 2–100 characters."
-          }, 400);
+          return json({ error: "Enter your full name using 2–100 characters." }, 400);
         }
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
-          return json({
-            error: "Enter a valid email address, for example jane@example.com."
-          }, 400);
+          return json({ error: "Enter a valid email address." }, 400);
         }
 
         if (password.length < 12 || password.length > 128) {
-          return json({
-            error: "Your password must contain 12–128 characters."
-          }, 400);
+          return json({ error: "Your password must contain 12–128 characters." }, 400);
         }
 
-        const existing = await env.DB.prepare(
+        const existing = await db.prepare(
           "SELECT id FROM users WHERE lower(email) = ?"
         ).bind(email).first();
 
@@ -375,13 +452,12 @@ export default {
         const id = crypto.randomUUID();
         const passwordHash = await createPasswordHash(password);
 
-        // Use a batch so the user and customer role are saved together.
-        await env.DB.batch([
-          env.DB.prepare(`
+        await db.batch([
+          db.prepare(`
             INSERT INTO users (id, full_name, email, password_hash, status)
             VALUES (?, ?, ?, ?, 'active')
           `).bind(id, fullName, email, passwordHash),
-          env.DB.prepare(`
+          db.prepare(`
             INSERT INTO user_roles (user_id, role)
             VALUES (?, 'customer')
           `).bind(id)
@@ -389,16 +465,17 @@ export default {
 
         return json({
           success: true,
-          message: "Your account has been created. Please log in using your email and password."
+          message: "Your account has been created. Please log in."
         }, 201);
       }
 
+      // ---------------------------------------------------------
+      // EMAIL LOGIN
+      // ---------------------------------------------------------
       if (path === "/api/auth/login" && request.method === "POST") {
-        let body;
+        const body = await readBody(request);
 
-        try {
-          body = await request.json();
-        } catch {
+        if (!body) {
           return json({ error: "Please check your email and password fields." }, 400);
         }
 
@@ -409,20 +486,14 @@ export default {
           return json({ error: "Enter both your email address and password." }, 400);
         }
 
-        const user = await env.DB.prepare(`
+        const user = await db.prepare(`
           SELECT id, full_name, email, password_hash, status
-          FROM users
-          WHERE lower(email) = ?
+          FROM users WHERE lower(email) = ?
         `).bind(email).first();
 
-        if (
-          !user ||
-          !user.password_hash ||
-          !(await verifyPassword(password, user.password_hash))
-        ) {
-          return json({
-            error: "The email or password is incorrect. Check both and try again."
-          }, 401);
+        if (!user || !user.password_hash ||
+            !(await verifyPassword(password, user.password_hash))) {
+          return json({ error: "The email or password is incorrect." }, 401);
         }
 
         if (user.status !== "active") {
@@ -431,26 +502,21 @@ export default {
           }, 403);
         }
 
-        const session = await createSession(env.DB, user.id);
-
-        return json({ success: true, ...session });
+        return json({
+          success: true,
+          ...(await createSession(db, user.id))
+        });
       }
 
+      // ---------------------------------------------------------
+      // GOOGLE SIGN-IN
+      // ---------------------------------------------------------
       if (path === "/api/auth/google" && request.method === "POST") {
-        let body;
-
-        try {
-          body = await request.json();
-        } catch {
-          return json({ error: "Google sign-in could not read the request. Please try again." }, 400);
-        }
-
-        const credential = String(body.credential || "");
+        const body = await readBody(request);
+        const credential = String(body?.credential || "");
 
         if (!credential || credential.length > 10000) {
-          return json({
-            error: "Google did not provide a valid sign-in credential. Try again."
-          }, 400);
+          return json({ error: "Google did not provide a valid credential." }, 400);
         }
 
         let claims;
@@ -459,19 +525,17 @@ export default {
           claims = await verifyGoogleCredential(credential);
         } catch (error) {
           console.error("Google verification failed:", error?.message || "Unknown error");
-
           return json({
-            error: "Google could not verify this sign-in. Check your connection and try again."
+            error: "Google could not verify this sign-in. Please try again."
           }, 401);
         }
 
         const email = String(claims.email).trim().toLowerCase();
         const googleSub = String(claims.sub);
         const fullName = String(claims.name || email.split("@")[0])
-          .trim()
-          .slice(0, 100);
+          .trim().slice(0, 100);
 
-        let account = await env.DB.prepare(`
+        let account = await db.prepare(`
           SELECT u.id, u.full_name, u.email, u.status
           FROM google_accounts g
           JOIN users u ON u.id = g.user_id
@@ -485,18 +549,15 @@ export default {
         }
 
         if (!account) {
-          const existing = await env.DB.prepare(`
+          const existing = await db.prepare(`
             SELECT id, full_name, email, status
-            FROM users
-            WHERE lower(email) = ?
+            FROM users WHERE lower(email) = ?
           `).bind(email).first();
 
           if (existing) {
-            // Google has verified this exact email. Link this Google identity
-            // to the existing account rather than creating a duplicate.
-            const linked = await env.DB.prepare(`
-              SELECT google_sub FROM google_accounts WHERE user_id = ?
-            `).bind(existing.id).first();
+            const linked = await db.prepare(
+              "SELECT google_sub FROM google_accounts WHERE user_id = ?"
+            ).bind(existing.id).first();
 
             if (linked && linked.google_sub !== googleSub) {
               return json({
@@ -505,44 +566,30 @@ export default {
             }
 
             if (!linked) {
-              try {
-                await env.DB.prepare(`
-                  INSERT INTO google_accounts (google_sub, user_id, email)
-                  VALUES (?, ?, ?)
-                `).bind(googleSub, existing.id, email).run();
-              } catch (error) {
-                console.error("Google account linking failed:", error?.message || "Unknown error");
-                return json({
-                  error: "We couldn't link Google to this account. Please log in with your email and password."
-                }, 409);
-              }
+              await db.prepare(`
+                INSERT INTO google_accounts (google_sub, user_id, email)
+                VALUES (?, ?, ?)
+              `).bind(googleSub, existing.id, email).run();
             }
 
             account = existing;
           } else {
             const id = crypto.randomUUID();
 
-            try {
-              await env.DB.batch([
-                env.DB.prepare(`
-                  INSERT INTO users (id, full_name, email, password_hash, status)
-                  VALUES (?, ?, ?, NULL, 'active')
-                `).bind(id, fullName || email, email),
-                env.DB.prepare(`
-                  INSERT INTO user_roles (user_id, role)
-                  VALUES (?, 'customer')
-                `).bind(id),
-                env.DB.prepare(`
-                  INSERT INTO google_accounts (google_sub, user_id, email)
-                  VALUES (?, ?, ?)
-                `).bind(googleSub, id, email)
-              ]);
-            } catch (error) {
-              console.error("Google account creation failed:", error?.message || "Unknown error");
-              return json({
-                error: "We couldn't create your Google account just now. Please try again."
-              }, 409);
-            }
+            await db.batch([
+              db.prepare(`
+                INSERT INTO users (id, full_name, email, password_hash, status)
+                VALUES (?, ?, ?, NULL, 'active')
+              `).bind(id, fullName || email, email),
+              db.prepare(`
+                INSERT INTO user_roles (user_id, role)
+                VALUES (?, 'customer')
+              `).bind(id),
+              db.prepare(`
+                INSERT INTO google_accounts (google_sub, user_id, email)
+                VALUES (?, ?, ?)
+              `).bind(googleSub, id, email)
+            ]);
 
             account = {
               id,
@@ -559,18 +606,20 @@ export default {
           }, 403);
         }
 
-        const session = await createSession(env.DB, account.id);
-
-        return json({ success: true, ...session });
+        return json({
+          success: true,
+          ...(await createSession(db, account.id))
+        });
       }
 
+      // ---------------------------------------------------------
+      // CURRENT USER AND LOGOUT
+      // ---------------------------------------------------------
       if (path === "/api/auth/me" && request.method === "GET") {
-        const user = await getSession(request, env.DB);
+        const user = await getSession(request, db);
 
         if (!user) {
-          return json({
-            error: "Your session has expired. Please log in again."
-          }, 401);
+          return json({ error: "Your session has expired. Please log in again." }, 401);
         }
 
         return json({ success: true, user });
@@ -583,7 +632,7 @@ export default {
           const token = header.slice(7).trim();
 
           if (token && token.length <= 200) {
-            await env.DB.prepare(
+            await db.prepare(
               "DELETE FROM auth_sessions WHERE token_hash = ?"
             ).bind(await sha256(token)).run();
           }
@@ -592,15 +641,432 @@ export default {
         return json({ success: true, message: "You have logged out." });
       }
 
+      // =========================================================
+      // ADMIN: LIST PRODUCTS
+      // =========================================================
+      if (path === "/api/admin/products" &&
+          request.method === "GET") {
+        const admin = await getAdmin(request, db, json);
+        if (admin.response) return admin.response;
+
+        const result = await db.prepare(`
+          SELECT
+            p.id, p.vendor_id, p.title, p.slug, p.description,
+            p.category, p.sku, p.cost_minor, p.price_minor,
+            p.currency, p.stock, p.status, p.country_of_origin,
+            p.return_policy, p.created_at, v.store_name,
+            v.status AS vendor_status
+          FROM products p
+          LEFT JOIN vendor_profiles v ON v.id = p.vendor_id
+          ORDER BY p.created_at DESC
+          LIMIT 200
+        `).all();
+
+        return json({
+          success: true,
+          products: result.results || []
+        });
+      }
+
+      // =========================================================
+      // ADMIN: CREATE PRODUCT
+      // =========================================================
+      if (path === "/api/admin/products" &&
+          request.method === "POST") {
+        const admin = await getAdmin(request, db, json);
+        if (admin.response) return admin.response;
+
+        const body = await readBody(request);
+        if (!body) return json({ error: "Invalid product details." }, 400);
+
+        const title = String(body.title || "").trim();
+        const description = String(body.description || "").trim();
+        const category = String(body.category || "").trim();
+        const currency = String(body.currency || "KES").trim().toUpperCase();
+        const cost = Number(body.cost_minor ?? 0);
+        const price = Number(body.price_minor);
+        const stock = Number(body.stock ?? 0);
+        const status = String(body.status || "draft");
+        const vendorId = String(body.vendor_id || "").trim();
+        const country = String(body.country_of_origin || "").trim();
+        const returnPolicy = String(body.return_policy || "").trim();
+        const sku = String(body.sku || "").trim();
+
+        if (!title || title.length > 200 || !category || category.length > 100) {
+          return json({ error: "Enter a product title and category." }, 400);
+        }
+
+        if (!Number.isSafeInteger(price) || price < 0 ||
+            !Number.isSafeInteger(cost) || cost < 0 ||
+            !Number.isSafeInteger(stock) || stock < 0) {
+          return json({
+            error: "Price, cost and stock must be valid non-negative whole numbers."
+          }, 400);
+        }
+
+        if (!["KES", "USD"].includes(currency)) {
+          return json({ error: "Supported currencies are KES and USD." }, 400);
+        }
+
+        if (!["draft", "published"].includes(status)) {
+          return json({ error: "Product status must be draft or published." }, 400);
+        }
+
+        let vendor;
+
+        if (vendorId) {
+          vendor = await db.prepare(`
+            SELECT id FROM vendor_profiles
+            WHERE id = ? AND status = 'active'
+          `).bind(vendorId).first();
+        } else {
+          vendor = await db.prepare(`
+            SELECT id FROM vendor_profiles
+            WHERE status = 'active'
+            ORDER BY created_at ASC LIMIT 1
+          `).first();
+        }
+
+        if (!vendor) {
+          return json({
+            error: "No approved active vendor was found. Approve a vendor first."
+          }, 409);
+        }
+
+        const id = crypto.randomUUID();
+        const slug = `${makeSlug(title) || "product"}-${id.slice(0, 8)}`;
+
+        await db.prepare(`
+          INSERT INTO products (
+            id, vendor_id, title, slug, description, category, sku,
+            cost_minor, price_minor, currency, stock, status,
+            country_of_origin, return_policy
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          id, vendor.id, title, slug, description, category,
+          sku || null, cost, price, currency, stock, status,
+          country || null, returnPolicy || null
+        ).run();
+
+        await logAdminAction(
+          db, admin.user.id, "product_created", "product", id, { title, status }
+        );
+
+        return json({
+          success: true,
+          message: "Product created.",
+          product_id: id
+        }, 201);
+      }
+
+      // =========================================================
+      // ADMIN: EDIT PRODUCT
+      // =========================================================
+      if (path === "/api/admin/products/update" &&
+          request.method === "POST") {
+        const admin = await getAdmin(request, db, json);
+        if (admin.response) return admin.response;
+
+        const body = await readBody(request);
+        if (!body) return json({ error: "Invalid product details." }, 400);
+
+        const id = String(body.id || "").trim();
+        const title = String(body.title || "").trim();
+        const description = String(body.description || "").trim();
+        const category = String(body.category || "").trim();
+        const currency = String(body.currency || "KES").trim().toUpperCase();
+        const cost = Number(body.cost_minor ?? 0);
+        const price = Number(body.price_minor);
+        const stock = Number(body.stock ?? 0);
+        const country = String(body.country_of_origin || "").trim();
+        const returnPolicy = String(body.return_policy || "").trim();
+        const sku = String(body.sku || "").trim();
+
+        if (!id || !title || title.length > 200 || !category) {
+          return json({ error: "Product ID, title and category are required." }, 400);
+        }
+
+        if (!Number.isSafeInteger(price) || price < 0 ||
+            !Number.isSafeInteger(cost) || cost < 0 ||
+            !Number.isSafeInteger(stock) || stock < 0 ||
+            !["KES", "USD"].includes(currency)) {
+          return json({ error: "Check the product price, cost, stock and currency." }, 400);
+        }
+
+        const existing = await db.prepare(
+          "SELECT id FROM products WHERE id = ?"
+        ).bind(id).first();
+
+        if (!existing) return json({ error: "Product not found." }, 404);
+
+        await db.prepare(`
+          UPDATE products
+          SET title = ?, description = ?, category = ?, sku = ?,
+              cost_minor = ?, price_minor = ?, currency = ?, stock = ?,
+              country_of_origin = ?, return_policy = ?
+          WHERE id = ?
+        `).bind(
+          title, description, category, sku || null, cost, price,
+          currency, stock, country || null, returnPolicy || null, id
+        ).run();
+
+        await logAdminAction(
+          db, admin.user.id, "product_updated", "product", id, { title }
+        );
+
+        return json({ success: true, message: "Product updated." });
+      }
+
+      // =========================================================
+      // ADMIN: PUBLISH OR UNPUBLISH PRODUCT
+      // =========================================================
+      if (path === "/api/admin/products/status" &&
+          request.method === "POST") {
+        const admin = await getAdmin(request, db, json);
+        if (admin.response) return admin.response;
+
+        const body = await readBody(request);
+        const id = String(body?.id || "").trim();
+        const status = String(body?.status || "");
+
+        if (!id || !["draft", "published"].includes(status)) {
+          return json({
+            error: "Provide a product ID and status of draft or published."
+          }, 400);
+        }
+
+        const product = await db.prepare(
+          "SELECT id FROM products WHERE id = ?"
+        ).bind(id).first();
+
+        if (!product) return json({ error: "Product not found." }, 404);
+
+        await db.prepare(
+          "UPDATE products SET status = ? WHERE id = ?"
+        ).bind(status, id).run();
+
+        await logAdminAction(
+          db, admin.user.id, "product_status_changed", "product", id, { status }
+        );
+
+        return json({ success: true, message: `Product status changed to ${status}.` });
+      }
+
+      // =========================================================
+      // ADMIN: DELETE PRODUCT AND ITS MEDIA RECORDS
+      // =========================================================
+      if (path === "/api/admin/products/delete" &&
+          request.method === "POST") {
+        const admin = await getAdmin(request, db, json);
+        if (admin.response) return admin.response;
+
+        const body = await readBody(request);
+        const id = String(body?.id || "").trim();
+
+        if (!id) return json({ error: "Product ID is required." }, 400);
+
+        const product = await db.prepare(
+          "SELECT id, title FROM products WHERE id = ?"
+        ).bind(id).first();
+
+        if (!product) return json({ error: "Product not found." }, 404);
+
+        // Delete associated media records first to avoid foreign-key conflicts.
+        await db.prepare(
+          "DELETE FROM product_media WHERE product_id = ?"
+        ).bind(id).run();
+
+        await db.prepare(
+          "DELETE FROM products WHERE id = ?"
+        ).bind(id).run();
+
+        await logAdminAction(
+          db, admin.user.id, "product_deleted", "product", id,
+          { title: product.title }
+        );
+
+        return json({
+          success: true,
+          message: "Product and its media records have been deleted."
+        });
+      }
+
+      // =========================================================
+      // ADMIN: LIST VENDORS
+      // =========================================================
+      if (path === "/api/admin/vendors" &&
+          request.method === "GET") {
+        const admin = await getAdmin(request, db, json);
+        if (admin.response) return admin.response;
+
+        const result = await db.prepare(`
+          SELECT
+            v.id AS vendor_id,
+            v.user_id,
+            v.store_name,
+            v.country,
+            v.status AS vendor_status,
+            v.created_at AS vendor_created_at,
+            u.full_name,
+            u.email,
+            u.phone,
+            u.status AS account_status
+          FROM vendor_profiles v
+          LEFT JOIN users u ON u.id = v.user_id
+          ORDER BY v.created_at DESC
+          LIMIT 200
+        `).all();
+
+        return json({
+          success: true,
+          vendors: result.results || []
+        });
+      }
+
+      // =========================================================
+      // ADMIN: APPROVE, WARN, SUSPEND, RESTORE OR BAN VENDOR
+      // =========================================================
+      if (path === "/api/admin/vendors/action" &&
+          request.method === "POST") {
+        const admin = await getAdmin(request, db, json);
+        if (admin.response) return admin.response;
+
+        const body = await readBody(request);
+        const vendorId = String(body?.vendor_id || "").trim();
+        const action = String(body?.action || "").trim().toLowerCase();
+        const reason = String(body?.reason || "").trim().slice(0, 1000);
+
+        const allowedActions = [
+          "approve", "warn", "suspend", "restore", "ban"
+        ];
+
+        if (!vendorId || !allowedActions.includes(action)) {
+          return json({
+            error: "Provide a vendor ID and action: approve, warn, suspend, restore or ban."
+          }, 400);
+        }
+
+        if (["warn", "suspend", "ban"].includes(action) && !reason) {
+          return json({
+            error: "Enter a reason so the decision can be recorded."
+          }, 400);
+        }
+
+        const vendor = await db.prepare(`
+          SELECT v.id, v.user_id, v.store_name, v.status, u.status AS account_status
+          FROM vendor_profiles v
+          LEFT JOIN users u ON u.id = v.user_id
+          WHERE v.id = ?
+        `).bind(vendorId).first();
+
+        if (!vendor) return json({ error: "Vendor account not found." }, 404);
+
+        if (vendor.user_id === admin.user.id && action !== "warn") {
+          return json({
+            error: "You cannot suspend, ban or change your own administrator account through vendor controls."
+          }, 403);
+        }
+
+        if (action === "approve") {
+          await db.batch([
+            db.prepare(`
+              UPDATE vendor_profiles SET status = 'active' WHERE id = ?
+            `).bind(vendorId),
+            db.prepare(`
+              UPDATE users SET status = 'active' WHERE id = ?
+            `).bind(vendor.user_id)
+          ]);
+        }
+
+        if (action === "warn") {
+          await logAdminAction(
+            db, admin.user.id, "vendor_warning_issued", "vendor", vendorId,
+            { store_name: vendor.store_name, reason }
+          );
+        }
+
+        if (action === "suspend") {
+          await db.batch([
+            db.prepare(`
+              UPDATE vendor_profiles SET status = 'suspended' WHERE id = ?
+            `).bind(vendorId),
+            db.prepare(`
+              UPDATE users SET status = 'suspended' WHERE id = ?
+            `).bind(vendor.user_id),
+            db.prepare(`
+              DELETE FROM auth_sessions WHERE user_id = ?
+            `).bind(vendor.user_id)
+          ]);
+        }
+
+        if (action === "restore") {
+          // Restoring re-enables the account and listing visibility.
+          // Use this only after the reason for suspension has been resolved.
+          await db.batch([
+            db.prepare(`
+              UPDATE vendor_profiles SET status = 'active' WHERE id = ?
+            `).bind(vendorId),
+            db.prepare(`
+              UPDATE users SET status = 'active' WHERE id = ?
+            `).bind(vendor.user_id)
+          ]);
+        }
+
+        if (action === "ban") {
+          await db.batch([
+            db.prepare(`
+              UPDATE vendor_profiles SET status = 'banned' WHERE id = ?
+            `).bind(vendorId),
+            db.prepare(`
+              UPDATE users SET status = 'banned' WHERE id = ?
+            `).bind(vendor.user_id),
+            db.prepare(`
+              DELETE FROM auth_sessions WHERE user_id = ?
+            `).bind(vendor.user_id)
+          ]);
+        }
+
+        if (action !== "warn") {
+          await logAdminAction(
+            db, admin.user.id, `vendor_${action}`, "vendor", vendorId,
+            {
+              store_name: vendor.store_name,
+              previous_vendor_status: vendor.status,
+              previous_account_status: vendor.account_status,
+              reason
+            }
+          );
+        }
+
+        const messages = {
+          approve: "Vendor approved. The vendor account is active.",
+          warn: "Warning recorded in the administrator action log.",
+          suspend: "Vendor suspended. Their account sessions have been revoked and their listings are hidden.",
+          restore: "Vendor account restored.",
+          ban: "Vendor banned. Their account sessions have been revoked and their listings are hidden."
+        };
+
+        return json({
+          success: true,
+          action,
+          message: messages[action]
+        });
+      }
+
+      // =========================================================
+      // PUBLIC PRODUCT CATALOGUE
+      // =========================================================
       if (path === "/api/products" && request.method === "GET") {
-        const result = await env.DB.prepare(`
+        const result = await db.prepare(`
           SELECT
             p.id, p.title, p.slug, p.description, p.category,
             p.price_minor, p.currency, p.stock, p.country_of_origin
           FROM products p
           INNER JOIN vendor_profiles v ON v.id = p.vendor_id
+          INNER JOIN users u ON u.id = v.user_id
           WHERE p.status = 'published'
             AND v.status = 'active'
+            AND u.status = 'active'
             AND p.stock > 0
           ORDER BY p.created_at DESC
           LIMIT 50
@@ -613,7 +1079,7 @@ export default {
           const placeholders = products.map(() => "?").join(", ");
           const ids = products.map(product => product.id);
 
-          const mediaResult = await env.DB.prepare(`
+          const mediaResult = await db.prepare(`
             SELECT product_id, media_url, media_type, sort_order
             FROM product_media
             WHERE product_id IN (${placeholders})
@@ -658,11 +1124,16 @@ export default {
         });
       }
 
-      return json({ error: "This ZAVO API route was not found." }, 404);
+      return json({
+        success: false,
+        error: "This ZAVO API route was not found."
+      }, 404);
+
     } catch (error) {
       console.error("ZAVO API error:", error?.message || "Unknown error");
 
       return json({
+        success: false,
         error: "ZAVO's server encountered a problem. Please try again shortly."
       }, 500);
     }
