@@ -2,679 +2,1435 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#174ea6">
-<meta name="description" content="Discover great products at competitive prices with ZAVO. Great Deals, Delivered.">
-<title>ZAVO | Great Deals, Delivered.</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#174ea6">
+  <meta name="description" content="Discover products at competitive prices with ZAVO. Great Deals, Delivered.">
+  <title>ZAVO | Great Deals, Delivered.</title>
 
-<style>
-:root{--blue:#174ea6;--yellow:#ffc928;--ink:#202b3c;--muted:#667085;--bg:#f6f8fc;--red:#c62828}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5}
-a{color:inherit;text-decoration:none}
-button,input{font:inherit}
-button{cursor:pointer}
-button:disabled{opacity:.65;cursor:not-allowed}
-.topbar{background:var(--blue);color:#fff;text-align:center;padding:9px 12px;font-size:13px}
-header{background:#fff;border-bottom:1px solid #e7ebf2;position:sticky;top:0;z-index:5}
-.nav{max-width:1120px;margin:auto;padding:15px 20px;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
-.logo{color:var(--blue);font-size:29px;font-weight:900;letter-spacing:-1.5px}
-.logo span,.footer-logo span{color:#e0a900}
-.search{flex:1;min-width:160px;max-width:440px;padding:11px 14px;border:1px solid #d8deea;border-radius:10px;background:#f8faff}
-.nav a{font-size:14px;font-weight:700}
-.account-button{border:1px solid var(--blue);border-radius:9px;padding:9px 12px;background:#fff;color:var(--blue);font-weight:800}
-.account-primary{background:var(--yellow);border-color:var(--yellow);color:#17345f}
-.hero{background:var(--blue);color:#fff;padding:58px 22px;overflow:hidden}
-.hero-inner{max-width:1080px;margin:auto;display:grid;grid-template-columns:1.3fr .7fr;gap:30px;align-items:center}
-.eyebrow{display:inline-block;background:var(--yellow);color:#19365f;padding:6px 12px;border-radius:30px;font-size:12px;font-weight:800;text-transform:uppercase}
-h1{font-size:clamp(38px,6vw,64px);line-height:1.04;letter-spacing:-2px;margin:18px 0}
-.hero p{max-width:480px;color:#e6eeff}
-.btn{display:inline-block;border:0;border-radius:10px;padding:13px 18px;font-weight:800;text-align:center}
-.btn-yellow{background:var(--yellow);color:#17345f}
-.btn-blue{background:var(--blue);color:#fff}
-.hero-art{background:#245db0;border:1px solid #4c7dca;border-radius:28px;padding:30px 20px;text-align:center}
-.bag{font-size:100px;line-height:1.3}
-.hero-art strong{display:block;font-size:22px}
-.hero-art small{color:#e6eeff}
-.benefits{max-width:1080px;margin:-1px auto 0;display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-bottom:1px solid #e8edf5}
-.benefit{padding:20px 12px;text-align:center}
-.benefit b{display:block;font-size:14px}
-.benefit span{color:var(--muted);font-size:12px}
-main{max-width:1080px;margin:auto;padding:38px 20px 60px}
-.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
-h2{margin:0;font-size:27px;letter-spacing:-.7px}
-.sub{margin:5px 0 0;color:var(--muted);font-size:14px}
-.categories{display:flex;gap:9px;flex-wrap:wrap;margin:22px 0}
-.chip{border:1px solid #dce3ef;border-radius:30px;padding:9px 15px;background:#fff;color:var(--ink);font-size:13px;font-weight:700}
-.chip.active,.chip:hover{background:var(--blue);border-color:var(--blue);color:#fff}
-.products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:17px}
-.card{background:#fff;border:1px solid #e8ecf3;border-radius:15px;overflow:hidden;display:flex;flex-direction:column;min-width:0;box-shadow:0 3px 12px #18345b08}
-.product-art{min-height:155px;height:180px;background:#edf3ff;display:grid;place-items:center;position:relative;overflow:hidden}
-.fallback-icon{font-size:65px}
-.product-art img,.product-art video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
-.media-controls{display:flex;gap:7px;overflow-x:auto;padding:9px 12px 0}
-.media-thumb{flex:0 0 48px;width:48px;height:48px;border:1px solid #dce3ef;border-radius:8px;padding:0;background:#fff;overflow:hidden}
-.media-thumb img{width:100%;height:100%;object-fit:cover}
-.media-thumb.active{border:2px solid var(--blue)}
-.media-thumb span{display:grid;place-items:center;height:100%;font-size:20px}
-.card-body{padding:13px;display:flex;flex-direction:column;flex:1}
-.category-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
-.card h3{font-size:15px;margin:5px 0 8px}
-.card-description{font-size:13px;color:var(--muted);margin:0 0 8px}
-.price{font-size:19px;font-weight:900;color:var(--blue)}
-.meta-line{font-size:12px;color:var(--muted);margin:7px 0 0}
-.rating{font-size:13px;margin:2px 0 8px;color:#7b5900}
-.review{border-left:3px solid var(--yellow);padding-left:9px;margin:8px 0 0;font-size:12px;color:var(--muted)}
-.card .btn{margin-top:13px;font-size:13px;width:100%}
-.empty{grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)}
-.notice{margin-top:30px;padding:18px;border-radius:13px;background:#fff6d7;color:#5d4b17;font-size:13px}
-.about{margin-top:35px;background:#fff;padding:27px;border-radius:18px;border:1px solid #e8ecf3}
-.about p{color:var(--muted);max-width:700px}
-footer{background:#132f60;color:#fff;padding:32px 20px}
-.footer-inner{max-width:1080px;margin:auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px}
-footer p,footer a{color:#dce7ff;font-size:13px}
-.footer-logo{color:#fff;font-size:24px;font-weight:900}
-.account-panel{display:none;position:fixed;inset:0;z-index:30;background:#101828b8;padding:12px;overflow:auto;align-items:center;justify-content:center}
-.account-panel.open{display:flex}
-.account-box{background:#fff;border-radius:18px;padding:24px;width:100%;max-width:430px;box-shadow:0 18px 55px #0003;max-height:95vh;overflow:auto}
-.account-box h2{font-size:25px;margin:4px 0 8px}
-.account-intro{font-size:14px;color:var(--muted);margin:0 0 14px}
-.account-close{float:right;border:0;border-radius:8px;background:#eef2f7;padding:8px 10px;color:var(--ink)}
-.account-box label{display:block;font-weight:700;font-size:13px;margin-top:14px}
-.required-star{color:var(--red);font-weight:900}
-.field-example{display:block;color:var(--muted);font-size:11px;font-weight:400;margin-top:2px}
-.account-box input{display:block;width:100%;min-width:0;padding:12px;border:1px solid #ccd4e0;border-radius:9px;margin-top:5px;background:#fff;color:var(--ink)}
-.account-box input:focus{outline:2px solid #a8c7fa;border-color:var(--blue)}
-.account-box input.invalid{border:1.5px solid var(--red);background:#fffafa}
-.field-error{color:var(--red);font-size:12px;margin:4px 0 0;min-height:0;overflow-wrap:anywhere}
-.field-error:not(:empty){padding:2px 0}
-.account-actions{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap}
-.account-actions button{padding:11px 13px;border:0;border-radius:9px;font-weight:700}
-.account-submit{background:var(--blue);color:#fff;flex:1}
-.account-switch{background:#eef3fb;color:var(--blue)}
-.account-message{font-size:13px;overflow-wrap:anywhere;margin:12px 0 0;color:var(--ink)}
-.account-message.error{color:var(--red)}
-.account-message.success{color:#16703b}
-.account-divider{display:flex;align-items:center;gap:10px;color:#8992a2;font-size:12px;margin:16px 0}
-.account-divider:before,.account-divider:after{content:"";height:1px;background:#e1e6ef;flex:1}
-#google-signin-container{width:100%;max-width:350px;min-height:44px;margin:0 auto;display:flex;justify-content:center;align-items:center;overflow:hidden}
-.google-note{font-size:11px;color:var(--muted);margin:7px 0 0;text-align:center;overflow-wrap:anywhere}
-.password-hint{font-size:11px;color:var(--muted);margin:5px 0 0}
-.password-row{display:flex;gap:7px;align-items:center}
-.password-row input{flex:1;width:0}
-.password-toggle{flex:0 0 auto;border:1px solid #ccd4e0;background:#f8faff;color:var(--blue);border-radius:8px;padding:10px 8px;margin-top:5px;font-size:12px;font-weight:700}
-[hidden]{display:none!important}
-@media(max-width:900px){.products{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:760px){
-.hero-inner{grid-template-columns:1fr}.hero{padding:42px 20px}.hero-art{display:none}
-.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.product-art{min-height:125px;height:150px}.fallback-icon{font-size:52px}
-.benefit{padding:15px 5px}.benefit b{font-size:12px}.benefit span{font-size:10px}
-.nav{gap:9px}.search{order:3;max-width:none;flex-basis:100%}
-.nav a{font-size:13px}.account-button{padding:8px;font-size:12px}
-h1{letter-spacing:-1px}.account-box{padding:18px}
-}
-@media(max-width:360px){
-.account-panel{padding:6px}.account-box{padding:14px}
-.account-actions{gap:6px}.account-actions button{padding:10px 8px;font-size:12px}
-.password-toggle{padding:9px 6px}
-}
-</style>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <style>
+    :root {
+      --blue: #174ea6;
+      --blue-dark: #103776;
+      --yellow: #ffc928;
+      --yellow-dark: #e0a900;
+      --ink: #172033;
+      --muted: #657087;
+      --bg: #f5f7fb;
+      --white: #ffffff;
+      --border: #e1e6ef;
+      --green: #147d45;
+      --red: #b42318;
+      --radius: 16px;
+      --shadow: 0 8px 28px rgba(20, 43, 80, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.55;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
+
+    a { color: inherit; }
+
+    .top-strip {
+      background: var(--blue-dark);
+      color: white;
+      text-align: center;
+      padding: 8px 14px;
+      font-size: .84rem;
+    }
+
+    .site-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .header-inner {
+      max-width: 1180px;
+      margin: auto;
+      padding: 13px 20px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      justify-content: space-between;
+    }
+
+    .brand {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 1.9rem;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      color: var(--blue);
+      flex-shrink: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--yellow);
+      color: var(--blue);
+      font-size: 1.4rem;
+      letter-spacing: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-weight: 750;
+      text-decoration: none;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 7px;
+      transition: transform .15s, background .15s;
+    }
+
+    .button:hover:not(:disabled) { transform: translateY(-1px); }
+    .button-primary { background: var(--yellow); color: #172033; }
+    .button-blue { background: var(--blue); color: white; }
+    .button-outline { background: white; color: var(--blue); border: 1px solid var(--border); }
+    .button-small { padding: 8px 12px; font-size: .9rem; }
+
+    .container {
+      width: min(1180px, calc(100% - 32px));
+      margin: auto;
+    }
+
+    .hero { padding: 38px 0 24px; }
+
+    .hero-panel {
+      overflow: hidden;
+      border-radius: 24px;
+      background: linear-gradient(120deg, #174ea6 0%, #2364c3 70%, #3679d5 100%);
+      color: white;
+      padding: clamp(25px, 6vw, 64px);
+      position: relative;
+    }
+
+    .hero-panel::after {
+      content: "Z";
+      position: absolute;
+      right: 5%;
+      top: -65px;
+      font-size: clamp(180px, 30vw, 380px);
+      line-height: 1;
+      font-weight: 900;
+      color: rgba(255,255,255,.055);
+      pointer-events: none;
+    }
+
+    .hero-content { position: relative; z-index: 1; max-width: 650px; }
+
+    .eyebrow {
+      display: inline-block;
+      background: var(--yellow);
+      color: #172033;
+      border-radius: 99px;
+      padding: 6px 12px;
+      font-weight: 800;
+      font-size: .8rem;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      line-height: 1.08;
+      letter-spacing: -1.5px;
+      margin: 0 0 16px;
+    }
+
+    .hero p {
+      max-width: 560px;
+      color: #e6efff;
+      font-size: 1.08rem;
+      margin: 0 0 24px;
+    }
+
+    .hero .button { min-height: 46px; }
+
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      padding: 18px 0 32px;
+    }
+
+    .benefit {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .benefit-icon {
+      font-size: 1.5rem;
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: #fff4c8;
+      flex-shrink: 0;
+    }
+
+    .benefit strong { display: block; }
+    .benefit small { color: var(--muted); }
+
+    .section { padding: 24px 0 42px; }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      margin: 0;
+      letter-spacing: -.7px;
+    }
+
+    .section-heading p { margin: 5px 0 0; color: var(--muted); }
+
+    .catalogue-tools {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 220px;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .field {
+      width: 100%;
+      min-width: 0;
+      padding: 12px 13px;
+      border: 1px solid #cfd7e5;
+      background: white;
+      border-radius: 10px;
+      color: var(--ink);
+    }
+
+    .field:focus {
+      outline: 3px solid rgba(23,78,166,.14);
+      border-color: var(--blue);
+    }
+
+    .status-message {
+      border-radius: 12px;
+      padding: 13px 15px;
+      margin: 14px 0;
+      background: #edf4ff;
+      color: #214b86;
+      border: 1px solid #d4e4ff;
+    }
+
+    .status-message.error {
+      background: #fff0ee;
+      color: var(--red);
+      border-color: #ffd3cd;
+    }
+
+    .status-message.success {
+      background: #eaf8ef;
+      color: var(--green);
+      border-color: #c9eed6;
+    }
+
+    .hidden { display: none !important; }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .product-card {
+      min-width: 0;
+      overflow: hidden;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 3px 12px rgba(20,43,80,.035);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-media {
+      aspect-ratio: 1 / 1;
+      position: relative;
+      background: #edf1f7;
+      overflow: hidden;
+    }
+
+    .product-media img,
+    .product-media video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .media-placeholder {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      color: #8b96a8;
+      font-size: 3rem;
+    }
+
+    .product-info {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .product-category {
+      font-size: .76rem;
+      font-weight: 800;
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+    }
+
+    .product-title {
+      font-weight: 750;
+      font-size: 1rem;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+      margin: 0;
+    }
+
+    .product-description {
+      font-size: .87rem;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+      margin: 0;
+    }
+
+    .product-price {
+      color: var(--blue);
+      font-size: 1.2rem;
+      font-weight: 900;
+      margin-top: auto;
+      padding-top: 4px;
+    }
+
+    .product-stock {
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+    .product-card .button { width: 100%; margin-top: 4px; }
+
+    .empty-state {
+      text-align: center;
+      background: white;
+      border: 1px dashed #cbd4e2;
+      border-radius: 16px;
+      padding: 34px 18px;
+      color: var(--muted);
+    }
+
+    .empty-state strong {
+      display: block;
+      font-size: 1.15rem;
+      color: var(--ink);
+      margin-bottom: 5px;
+    }
+
+    .about-panel {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: clamp(20px, 4vw, 34px);
+    }
+
+    .about-panel h2 { margin-top: 0; }
+    .about-panel p { color: var(--muted); }
+
+    footer {
+      background: #102f62;
+      color: white;
+      padding: 32px 0;
+      margin-top: 15px;
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer p { color: #d8e5fb; margin: 5px 0; font-size: .9rem; }
+
+    .footer-brand { color: white; font-size: 1.4rem; font-weight: 900; }
+
+    /* Account dialog */
+    .dialog-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(10, 23, 45, .68);
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .dialog {
+      width: min(460px, 100%);
+      background: white;
+      border-radius: 18px;
+      padding: 25px;
+      box-shadow: 0 25px 90px rgba(0,0,0,.25);
+      margin: auto;
+      position: relative;
+    }
+
+    .dialog h2 { margin: 0 0 5px; }
+    .dialog-intro { color: var(--muted); margin: 0 0 18px; font-size: .92rem; }
+
+    .dialog-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      border: 0;
+      border-radius: 9px;
+      background: #edf1f7;
+      width: 38px;
+      height: 38px;
+      font-size: 1.4rem;
+    }
+
+    .account-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      background: #edf1f7;
+      padding: 5px;
+      border-radius: 11px;
+      margin: 18px 0;
+    }
+
+    .account-tab {
+      padding: 10px;
+      border: 0;
+      background: transparent;
+      border-radius: 8px;
+      font-weight: 750;
+      color: var(--muted);
+    }
+
+    .account-tab.active { background: white; color: var(--blue); box-shadow: 0 1px 5px #d5dce7; }
+
+    .form-stack { display: grid; gap: 12px; }
+    .form-stack label { display: grid; gap: 5px; font-weight: 700; font-size: .9rem; }
+    .form-stack .button { width: 100%; min-height: 45px; }
+
+    .form-note { color: var(--muted); font-size: .82rem; margin: 0; }
+    .form-divider { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: .84rem; }
+    .form-divider::before, .form-divider::after { content: ""; height: 1px; background: var(--border); flex: 1; }
+
+    #google-button { min-height: 42px; display: flex; justify-content: center; }
+
+    .account-summary {
+      border: 1px solid var(--border);
+      background: #f7f9fc;
+      padding: 14px;
+      border-radius: 12px;
+      margin: 16px 0;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 950px) {
+      .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .benefits { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 650px) {
+      .header-inner { padding: 11px 14px; gap: 8px; }
+      .brand { font-size: 1.55rem; }
+      .brand-mark { width: 34px; height: 34px; }
+      .header-actions { gap: 6px; }
+      .header-actions .button { padding: 9px 10px; font-size: .85rem; }
+      .container { width: calc(100% - 24px); }
+      .hero { padding-top: 22px; }
+      .hero-panel { border-radius: 18px; }
+      .catalogue-tools { grid-template-columns: 1fr; }
+      .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+      .product-info { padding: 11px; gap: 7px; }
+      .product-title { font-size: .92rem; }
+      .product-description { font-size: .82rem; }
+      .product-price { font-size: 1.05rem; }
+      .product-info .button { font-size: .82rem; padding: 9px 6px; }
+      .section-heading { align-items: start; flex-direction: column; }
+      .dialog { padding: 22px 17px; }
+    }
+
+    @media (max-width: 360px) {
+      .header-actions .button { padding: 8px; }
+      .brand { gap: 5px; font-size: 1.35rem; }
+      .product-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 
 <body>
-<div class="topbar">Welcome to ZAVO · Great Deals, Delivered.</div>
+  <div class="top-strip">
+    ZAVO — Great Deals, Delivered.
+  </div>
 
-<header>
-<nav class="nav" aria-label="Main navigation">
-<a class="logo" href="#" aria-label="ZAVO home">ZA<span>V</span>O</a>
-<input id="search" class="search" type="search" placeholder="Search products..." aria-label="Search products">
-<a href="#products">Shop now ↓</a>
-<button class="account-button" id="open-login" type="button">Log in</button>
-<button class="account-button account-primary" id="open-register" type="button">Sign up</button>
-</nav>
-</header>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#" aria-label="ZAVO home">
+        <span class="brand-mark">Z</span>
+        <span>ZAVO</span>
+      </a>
 
-<section class="hero">
-<div class="hero-inner">
-<div>
-<span class="eyebrow">Your next great find</span>
-<h1>Great deals.<br>Better everyday.</h1>
-<p>Discover useful finds for your home, style and everyday life — all in one place.</p>
-<a class="btn btn-yellow" href="#products">Explore products →</a>
-</div>
-<div class="hero-art" aria-hidden="true">
-<div class="bag">🛍️</div>
-<strong>More value, less fuss.</strong>
-<small>Your shopping journey starts here.</small>
-</div>
-</div>
-</section>
+      <div class="header-actions">
+        <button class="button button-outline" id="open-login" type="button">
+          Log in
+        </button>
+        <button class="button button-primary" id="open-register" type="button">
+          Sign up
+        </button>
+      </div>
+    </div>
+  </header>
 
-<section class="benefits" aria-label="Shopping benefits">
-<div class="benefit"><b>🏷️ Great-value finds</b><span>Discover competitive prices</span></div>
-<div class="benefit"><b>📦 Supplier-direct</b><span>Products sent by our suppliers</span></div>
-<div class="benefit"><b>💬 Personal support</b><span>Help when you need it</span></div>
-</section>
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-panel">
+          <div class="hero-content">
+            <span class="eyebrow">SMARTER SHOPPING STARTS HERE</span>
+            <h1>Great deals.<br>Delivered with ZAVO.</h1>
+            <p>
+              Explore products, compare your options and discover great deals
+              through ZAVO's growing marketplace.
+            </p>
+            <a class="button button-primary" href="#products">Explore products ↓</a>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<main>
-<section id="products">
-<div class="section-head">
-<div><h2>Explore our finds</h2><p class="sub">A little something for everyday life.</p></div>
-<span class="sub" id="count">Loading products...</span>
-</div>
-<div class="categories" id="categories" aria-label="Filter products">
-<button class="chip active" data-category="All" type="button">All products</button>
-<button class="chip" data-category="Home" type="button">Home</button>
-<button class="chip" data-category="Fashion" type="button">Fashion</button>
-<button class="chip" data-category="Beauty" type="button">Beauty</button>
-<button class="chip" data-category="Tech" type="button">Tech</button>
-<button class="chip" data-category="General" type="button">General</button>
-</div>
-<div class="products" id="product-list"><p class="empty">Loading ZAVO products...</p></div>
-<div class="notice"><strong>Demo catalogue:</strong> Sample products and illustrative prices are not verified offers. Replace them with confirmed supplier products, real images, accurate prices and delivery terms before accepting orders.</div>
-</section>
+    <section class="container" aria-label="ZAVO benefits">
+      <div class="benefits">
+        <div class="benefit">
+          <span class="benefit-icon" aria-hidden="true">🏷️</span>
+          <div>
+            <strong>Competitive prices</strong>
+            <small>Explore available products and their listed prices.</small>
+          </div>
+        </div>
+        <div class="benefit">
+          <span class="benefit-icon" aria-hidden="true">🌍</span>
+          <div>
+            <strong>A growing marketplace</strong>
+            <small>Discover products as the ZAVO catalogue expands.</small>
+          </div>
+        </div>
+        <div class="benefit">
+          <span class="benefit-icon" aria-hidden="true">🔒</span>
+          <div>
+            <strong>Account security matters</strong>
+            <small>Use your own account and keep your password private.</small>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<section class="about" id="about">
-<h2>A smarter way to discover products</h2>
-<p>ZAVO is being built to help shoppers discover useful products at competitive prices, with clear information and friendly support. We're starting in Kenya, with the ambition to serve more African markets.</p>
-</section>
+    <section class="section" id="products">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+            <h2>Explore products</h2>
+            <p>Products are loaded from the ZAVO marketplace API.</p>
+          </div>
+          <button class="button button-outline button-small" id="refresh-products" type="button">
+            ↻ Refresh
+          </button>
+        </div>
 
-<section class="about" id="contact">
-<h2>Interested in a product?</h2>
-<p>Our order service is being set up. Contact details will be added here once your business number and order process are ready.</p>
-<p><strong>Coming next:</strong> product enquiries, order confirmation and delivery arrangements.</p>
-</section>
-</main>
+        <div class="status-message" id="catalogue-notice" role="status">
+          Loading products from ZAVO…
+        </div>
 
-<footer>
-<div class="footer-inner">
-<div><div class="footer-logo">ZA<span>V</span>O</div><p>Great Deals, Delivered.</p></div>
-<div><a href="#about">About ZAVO</a><br><a href="#contact">Contact & orders</a><p>© <span id="year"></span> ZAVO. All rights reserved.</p></div>
-</div>
-</footer>
+        <div class="catalogue-tools">
+          <input
+            class="field"
+            id="product-search"
+            type="search"
+            placeholder="Search products..."
+            aria-label="Search products"
+          >
+          <select class="field" id="category-filter" aria-label="Filter by category">
+            <option value="">All categories</option>
+          </select>
+        </div>
 
-<div class="account-panel" id="account-panel" role="dialog" aria-modal="true" aria-labelledby="account-title">
-<section class="account-box">
-<button class="account-close" id="close-account" type="button" aria-label="Close account window">Close ✕</button>
-<h2 id="account-title">Welcome to ZAVO</h2>
-<p class="account-intro" id="account-intro">Create an account or log in. You can browse products without an account.</p>
+        <div class="product-grid" id="product-grid" aria-live="polite"></div>
 
-<form id="register-form" hidden novalidate>
-<label for="register-name">Full name <span class="required-star">*</span><span class="field-example">Example: Caroline Akoth Ogot</span></label>
-<input id="register-name" name="full_name" autocomplete="name" minlength="2" maxlength="100" placeholder="e.g. Caroline Akoth Ogot" required aria-describedby="register-name-error">
-<p class="field-error" id="register-name-error" aria-live="polite"></p>
+        <div class="empty-state hidden" id="empty-state">
+          <strong id="empty-title">No products found</strong>
+          <span id="empty-description">Try a different search or category.</span>
+        </div>
 
-<label for="register-email">Email address <span class="required-star">*</span><span class="field-example">Example: caroline@example.com</span></label>
-<input id="register-email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="e.g. caroline@example.com" required aria-describedby="register-email-error">
-<p class="field-error" id="register-email-error" aria-live="polite"></p>
+        <p class="form-note" style="margin-top:16px">
+          Catalogue availability does not mean that an order or payment can
+          currently be completed. Checkout will be enabled after the required
+          order, delivery and payment services are implemented and tested.
+        </p>
+      </div>
+    </section>
 
-<label for="register-password">Password <span class="required-star">*</span><span class="field-example">Use 12–128 characters; avoid reusing another password.</span></label>
-<div class="password-row">
-<input id="register-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Create a strong password" required aria-describedby="register-password-error password-hint">
-<button class="password-toggle" type="button" data-toggle="register-password">Show</button>
-</div>
-<p class="field-error" id="register-password-error" aria-live="polite"></p>
-<p class="password-hint" id="password-hint">Longer, unique passwords are safer. ZAVO will never display your password.</p>
+    <section class="section">
+      <div class="container">
+        <div class="about-panel">
+          <h2>Welcome to ZAVO</h2>
+          <p>
+            ZAVO is being developed as an online marketplace connecting
+            customers with products offered by marketplace sellers. Product
+            availability, delivery terms, return policies and final prices
+            should be confirmed before a purchase is accepted.
+          </p>
+          <p>
+            This website currently supports catalogue browsing and account
+            access. It does not yet accept or confirm customer orders or
+            process payments.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
 
-<label for="register-confirm-password">Confirm password <span class="required-star">*</span><span class="field-example">Enter the same password again.</span></label>
-<div class="password-row">
-<input id="register-confirm-password" name="confirm_password" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="Re-enter your password" required aria-describedby="register-confirm-password-error">
-<button class="password-toggle" type="button" data-toggle="register-confirm-password">Show</button>
-</div>
-<p class="field-error" id="register-confirm-password-error" aria-live="polite"></p>
+  <footer>
+    <div class="container footer-inner">
+      <div>
+        <div class="footer-brand">ZAVO</div>
+        <p>Great Deals, Delivered.</p>
+      </div>
+      <div>
+        <p>© <span id="current-year"></span> ZAVO. All rights reserved.</p>
+        <p>Contact and order support details will be published when available.</p>
+      </div>
+    </div>
+  </footer>
 
-<div class="account-actions">
-<button class="account-submit" type="submit">Create account</button>
-<button class="account-switch" id="switch-login" type="button">Log in instead</button>
-</div>
-</form>
+  <!-- Account dialog -->
+  <div class="dialog-backdrop hidden" id="account-backdrop">
+    <section
+      class="dialog"
+      id="account-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="account-title"
+      aria-describedby="account-intro"
+    >
+      <button class="dialog-close" id="close-account" type="button" aria-label="Close account dialog">
+        ×
+      </button>
 
-<form id="login-form" hidden novalidate>
-<label for="login-email">Email address <span class="required-star">*</span><span class="field-example">Example: caroline@example.com</span></label>
-<input id="login-email" name="email" type="email" autocomplete="username" maxlength="254" placeholder="Enter your registered email" required aria-describedby="login-email-error">
-<p class="field-error" id="login-email-error" aria-live="polite"></p>
+      <h2 id="account-title">Your ZAVO account</h2>
+      <p class="dialog-intro" id="account-intro">
+        Sign in or create an account to continue.
+      </p>
 
-<label for="login-password">Password <span class="required-star">*</span><span class="field-example">Enter the password you used when registering.</span></label>
-<div class="password-row">
-<input id="login-password" name="password" type="password" autocomplete="current-password" maxlength="128" placeholder="Enter your password" required aria-describedby="login-password-error">
-<button class="password-toggle" type="button" data-toggle="login-password">Show</button>
-</div>
-<p class="field-error" id="login-password-error" aria-live="polite"></p>
+      <div class="account-tabs" id="account-tabs">
+        <button class="account-tab active" id="tab-login" type="button">Log in</button>
+        <button class="account-tab" id="tab-register" type="button">Sign up</button>
+      </div>
 
-<div class="account-actions">
-<button class="account-submit" type="submit">Log in</button>
-<button class="account-switch" id="switch-register" type="button">Create account</button>
-</div>
-</form>
+      <div class="status-message hidden" id="account-message" role="status"></div>
 
-<div id="signed-in-panel" hidden>
-<p id="signed-in-message"></p>
-<div class="account-actions"><button class="account-submit" id="logout-button" type="button">Log out</button></div>
-</div>
+      <div id="login-panel">
+        <form class="form-stack" id="login-form">
+          <label>
+            Email address
+            <input class="field" id="login-email" type="email" autocomplete="email" required>
+          </label>
 
-<div class="account-divider">OR</div>
-<div id="google-signin-container"></div>
-<p class="google-note" id="google-note">Sign in securely with your Google account.</p>
-<p class="account-message" id="account-message" role="status" aria-live="polite"></p>
-</section>
-</div>
+          <label>
+            Password
+            <input class="field" id="login-password" type="password"
+              autocomplete="current-password" required>
+          </label>
 
-<script>
-"use strict";
+          <button class="button button-blue" id="login-submit" type="submit">Log in</button>
+        </form>
 
-const API_URL = "https://zavo-api.owinosylvester2025.workers.dev";
-const GOOGLE_CLIENT_ID = "776829851538-0qs24flt8ia16d6p3ir3fps9s7tmfbee.apps.googleusercontent.com";
+        <div class="form-divider" style="margin:18px 0">or</div>
+        <div id="google-button"></div>
+        <p class="form-note" style="margin-top:12px">
+          Google sign-in requires a correctly configured Google OAuth client
+          and the matching API endpoint.
+        </p>
+      </div>
 
-const $ = id => document.getElementById(id);
-const search = $("search");
-const productList = $("product-list");
-const count = $("count");
-const chips = [...document.querySelectorAll(".chip")];
-let products = [];
-let category = "All";
+      <div id="register-panel" class="hidden">
+        <form class="form-stack" id="register-form">
+          <label>
+            Full name
+            <input class="field" id="register-name" type="text"
+              autocomplete="name" minlength="2" maxlength="100" required>
+          </label>
 
-function formatPrice(amount,currency){
-  const n=Number(amount);
-  if(!Number.isFinite(n))return "Price unavailable";
-  try{return new Intl.NumberFormat("en-KE",{style:"currency",currency:currency||"KES",maximumFractionDigits:2}).format(n/100)}
-  catch{return "Price unavailable"}
-}
-function escapeHTML(value){
-  return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
-function getSafeMediaURL(value){
-  if(typeof value!=="string"||!value.trim())return "";
-  try{const u=new URL(value);return u.protocol==="https:"||u.protocol==="http:"?u.href:""}catch{return ""}
-}
-function normalizeMedia(product){
-  const media=[];
-  (Array.isArray(product.images)?product.images:[]).forEach(value=>{const url=getSafeMediaURL(value);if(url)media.push({type:"image",url})});
-  (Array.isArray(product.videos)?product.videos:[]).forEach(value=>{const url=getSafeMediaURL(value);if(url)media.push({type:"video",url})});
-  if(!media.length){const url=getSafeMediaURL(product.image_url);if(url)media.push({type:"image",url})}
-  return media;
-}
-function renderOptionalList(label,value){
-  let items=[];
-  if(Array.isArray(value))items=value.map(v=>String(v??"").trim()).filter(Boolean);
-  else if(typeof value==="string"&&value.trim())items=value.split(",").map(v=>v.trim()).filter(Boolean);
-  if(!items.length)return "";
-  return `<p class="meta-line"><strong>${escapeHTML(label)}:</strong> ${items.map(escapeHTML).join(", ")}</p>`;
-}
-function renderRating(product){
-  const raw=product.rating??product.average_rating;
-  const number=Number(raw);
-  const hasRating=raw!==null&&raw!==undefined&&String(raw).trim()!==""&&Number.isFinite(number)&&number>=0&&number<=5;
-  const review=String(product.review_text??product.review??"").trim();
-  let output="";
-  if(hasRating)output+=`<p class="rating" aria-label="Rating ${number} out of 5">★ ${Math.round(number*10)/10}/5</p>`;
-  if(review)output+=`<p class="review">${escapeHTML(review)}</p>`;
-  return output;
-}
-function renderMedia(product,index){
-  const media=normalizeMedia(product);
-  const title=escapeHTML(product.title||"Product");
-  let main='<span class="fallback-icon" aria-label="Product image unavailable">🛍️</span>';
-  if(media[0])main=media[0].type==="image"
-    ?`<img class="main-media" src="${escapeHTML(media[0].url)}" alt="${title}" loading="lazy">`
-    :`<video class="main-media" src="${escapeHTML(media[0].url)}" controls preload="metadata" aria-label="${title} video"></video>`;
-  const thumbnails=media.length>1?`<div class="media-controls" aria-label="More product media">
-  ${media.map((item,i)=>`<button class="media-thumb ${i===0?"active":""}" type="button" data-product-index="${index}" data-media-index="${i}" aria-label="Show ${item.type} ${i+1}">${item.type==="image"?`<img src="${escapeHTML(item.url)}" alt="" loading="lazy">`:'<span aria-hidden="true">▶</span>'}</button>`).join("")}
-  </div>`:"";
-  return `<div class="product-art">${main}</div>${thumbnails}`;
-}
-function attachMediaHandlers(filtered){
-  productList.querySelectorAll(".main-media").forEach(element=>element.addEventListener("error",()=>{
-    const art=element.closest(".product-art");if(!art)return;
-    element.remove();
-    if(!art.querySelector(".fallback-icon")){const fallback=document.createElement("span");fallback.className="fallback-icon";fallback.textContent="🛍️";art.appendChild(fallback)}
-  },{once:true}));
-  productList.querySelectorAll(".media-thumb").forEach(button=>button.addEventListener("click",()=>{
-    const product=filtered[Number(button.dataset.productIndex)];
-    if(!product)return;
-    const media=normalizeMedia(product)[Number(button.dataset.mediaIndex)];
-    const card=button.closest(".card");const art=card?.querySelector(".product-art");
-    if(!media||!art)return;
-    art.innerHTML=media.type==="image"
-      ?`<img class="main-media" src="${escapeHTML(media.url)}" alt="${escapeHTML(product.title||"Product")}" loading="lazy">`
-      :`<video class="main-media" src="${escapeHTML(media.url)}" controls preload="metadata"></video>`;
-    card.querySelectorAll(".media-thumb").forEach(thumb=>thumb.classList.toggle("active",thumb===button));
-    const element=art.querySelector(".main-media");
-    if(element)element.addEventListener("error",()=>{art.innerHTML='<span class="fallback-icon">🛍️</span>'},{once:true});
-  }));
-}
-function renderProducts(){
-  const query=search.value.trim().toLowerCase();
-  const filtered=products.filter(product=>{
-    const cat=String(product.category??"");
-    const colors=Array.isArray(product.colors)?product.colors.join(" "):String(product.colors??product.colours??"");
-    const sizes=Array.isArray(product.sizes)?product.sizes.join(" "):String(product.sizes??"");
-    return(category==="All"||cat.toLowerCase()===category.toLowerCase())&&
-      [String(product.title??""),String(product.description??""),cat,colors,sizes].some(value=>value.toLowerCase().includes(query));
-  });
-  count.textContent=`${filtered.length} ${filtered.length===1?"product":"products"}`;
-  if(!filtered.length){productList.innerHTML='<p class="empty">No products found in this category.</p>';return}
-  productList.innerHTML=filtered.map((product,index)=>{
-    const title=escapeHTML(product.title||"Untitled product");
-    const cat=escapeHTML(product.category||"General");
-    const descriptionText=String(product.description??"").trim();
-    const description=descriptionText?`<p class="card-description">${escapeHTML(descriptionText)}</p>`:"";
-    const quantity=Number(product.stock);
-    const stock=Number.isFinite(quantity)?Math.max(0,quantity):0;
-    return `<article class="card" data-product-id="${escapeHTML(product.id||"")}">
-    ${renderMedia(product,index)}
-    <div class="card-body"><span class="category-label">${cat}</span><h3>${title}</h3>${description}
-    ${renderOptionalList("Colours",product.colors??product.colours)}
-    ${renderOptionalList("Sizes",product.sizes)}${renderRating(product)}
-    <div class="price">${formatPrice(product.price_minor,product.currency)}</div>
-    <p class="sub">In stock: ${stock}</p>
-    <button class="btn btn-blue" type="button" disabled>Shopping features coming soon</button>
-    </div></article>`;
-  }).join("");
-  attachMediaHandlers(filtered);
-}
-async function loadProducts(){
-  productList.innerHTML='<p class="empty">Loading ZAVO products...</p>';
-  try{
-    const res=await fetch(`${API_URL}/api/products`);
-    if(!res.ok)throw new Error(`The product service returned HTTP ${res.status}.`);
-    const data=await res.json();
-    if(!data.success||!Array.isArray(data.products))throw new Error("The product service returned an unexpected response.");
-    products=data.products;renderProducts();
-  }catch(error){
-    console.error("ZAVO product loading error:",error);
-    productList.innerHTML=`<p class="empty">${escapeHTML(networkMessage(error,"load products"))}</p>`;
-    count.textContent="Products unavailable";
-  }
-}
-chips.forEach(chip=>chip.addEventListener("click",()=>{
-  category=chip.dataset.category;
-  chips.forEach(item=>item.classList.toggle("active",item===chip));
-  renderProducts();
-}));
-search.addEventListener("input",renderProducts);
-$("year").textContent=new Date().getFullYear();
-loadProducts();
+          <label>
+            Email address
+            <input class="field" id="register-email" type="email"
+              autocomplete="email" maxlength="254" required>
+          </label>
 
-/* ACCOUNT AND FIELD VALIDATION */
-const panel=$("account-panel");
-const registerForm=$("register-form");
-const loginForm=$("login-form");
-const accountTitle=$("account-title");
-const accountIntro=$("account-intro");
-const accountMessage=$("account-message");
-const signedInPanel=$("signed-in-panel");
-const signedInMessage=$("signed-in-message");
-const googleContainer=$("google-signin-container");
-const googleNote=$("google-note");
+          <label>
+            Password
+            <input class="field" id="register-password" type="password"
+              autocomplete="new-password" minlength="12" required>
+          </label>
 
-function token(){return sessionStorage.getItem("zavoToken")}
-function updateLoginButton(isLoggedIn){$("open-login").textContent=isLoggedIn?"My account":"Log in"}
-function showMessage(message,type=""){
-  accountMessage.textContent=message;
-  accountMessage.className="account-message"+(type?" "+type:"");
-}
-function clearMessages(){
-  showMessage("");
-  document.querySelectorAll(".field-error").forEach(el=>el.textContent="");
-  document.querySelectorAll(".account-box input").forEach(el=>el.classList.remove("invalid"));
-}
-function setFieldError(input,message){
-  const error=$(input.id+"-error");
-  if(error)error.textContent=message;
-  input.classList.toggle("invalid",Boolean(message));
-  input.setAttribute("aria-invalid",message?"true":"false");
-}
-function clearField(input){setFieldError(input,"")}
-function showAccount(mode){
-  clearMessages();
-  panel.classList.add("open");
-  registerForm.hidden=mode!=="register";
-  loginForm.hidden=mode!=="login";
-  signedInPanel.hidden=true;
-  accountTitle.textContent=mode==="register"?"Create your ZAVO account":"Log in to ZAVO";
-  accountIntro.textContent="You can browse ZAVO products without an account.";
-  if(window.google?.accounts?.id)setTimeout(initializeGoogleSignIn,100);
-}
-function closeAccount(){panel.classList.remove("open")}
-$("open-login").addEventListener("click",async()=>{
-  if(token()){
-    try{
-      const result=await accountRequest("me",null,token());
-      registerForm.hidden=true;loginForm.hidden=true;signedInPanel.hidden=false;
-      accountTitle.textContent="Your ZAVO account";
-      accountIntro.textContent="You can continue browsing products.";
-      signedInMessage.textContent=`Welcome back, ${result.user?.full_name||"ZAVO customer"}.`;
-      clearMessages();panel.classList.add("open");return;
-    }catch{sessionStorage.removeItem("zavoToken");updateLoginButton(false)}
-  }
-  showAccount("login");
-});
-$("open-register").addEventListener("click",()=>showAccount("register"));
-$("close-account").addEventListener("click",closeAccount);
-panel.addEventListener("click",event=>{if(event.target===panel)closeAccount()});
-document.addEventListener("keydown",event=>{if(event.key==="Escape")closeAccount()});
-$("switch-login").addEventListener("click",()=>showAccount("login"));
-$("switch-register").addEventListener("click",()=>showAccount("register"));
+          <label>
+            Confirm password
+            <input class="field" id="register-confirm" type="password"
+              autocomplete="new-password" minlength="12" required>
+          </label>
 
-/* Translate common network failures into useful plain language. */
-function networkMessage(error,action){
-  const message=String(error?.message||"");
-  if(message.includes("HTTP 404"))return "This ZAVO service address was not found. Please contact support.";
-  if(message.includes("HTTP 401"))return "Your email/password combination was not accepted. Check your details and try again.";
-  if(message.includes("HTTP 403"))return "This request was blocked. Please open the official ZAVO website and try again.";
-  if(message.includes("HTTP 409"))return "An account already exists with these details. Try logging in instead.";
-  if(message.includes("HTTP 429"))return "Too many attempts were made. Please wait a few minutes and try again.";
-  if(message.includes("HTTP 5"))return "The ZAVO server is temporarily having a problem. Please try again shortly.";
-  if(error instanceof TypeError||/fetch|network|failed to fetch/i.test(message)){
-    if(location.hostname!=="zavo-store.pages.dev"){
-      return "You are viewing a different website address. Open https://zavo-store.pages.dev and try again. Google sign-in and account requests may not work on the GitHub preview.";
+          <p class="form-note">
+            Use at least 12 characters. Do not reuse a password from another
+            important account.
+          </p>
+
+          <button class="button button-primary" id="register-submit" type="submit">
+            Create account
+          </button>
+        </form>
+
+        <p class="form-note" style="margin-top:12px">
+          Email verification is not yet implemented on the current backend.
+          Creating an account here does not mean an email verification message
+          has been sent.
+        </p>
+      </div>
+
+      <div id="account-panel" class="hidden">
+        <div class="account-summary">
+          <strong id="account-name"></strong>
+          <p id="account-email" style="margin:4px 0"></p>
+          <p class="form-note" id="account-roles"></p>
+        </div>
+        <button class="button button-outline" id="logout-button" type="button" style="width:100%">
+          Log out
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    "use strict";
+
+    const API_URL = "https://zavo-api.owinosylvester2025.workers.dev";
+    const GOOGLE_CLIENT_ID =
+      "776829851538-0qs24flt8ia16d6p3ir3fps9s7tmfbee.apps.googleusercontent.com";
+
+    const $ = (id) => document.getElementById(id);
+
+    let allProducts = [];
+    let activeAccountTab = "login";
+    let currentUser = null;
+    let googleInitialized = false;
+    let lastFocusedElement = null;
+
+    $("current-year").textContent = String(new Date().getFullYear());
+
+    function getToken() {
+      return sessionStorage.getItem("zavoToken");
     }
-    return `ZAVO could not connect to its account service while trying to ${action}. Check your internet connection. If your connection works, the Cloudflare API or its access settings may be unavailable. Please try again shortly.`;
-  }
-  return message||`ZAVO could not ${action}. Please check your details and try again.`;
-}
-async function accountRequest(path,data,sessionToken){
-  const headers={"Content-Type":"application/json"};
-  if(sessionToken)headers.Authorization=`Bearer ${sessionToken}`;
-  const options={method:path==="me"?"GET":"POST",headers};
-  if(path!=="me")options.body=JSON.stringify(data||{});
-  let res;
-  try{res=await fetch(`${API_URL}/api/auth/${path}`,options)}
-  catch(error){throw new Error(networkMessage(error,path==="register"?"create your account":path==="login"?"log you in":"complete your request"))}
-  let result={};
-  try{result=await res.json()}catch{}
-  if(!res.ok){
-    const error=new Error(result.error||`ZAVO returned an error (HTTP ${res.status}).`);
-    error.status=res.status;error.apiMessage=result.error||"";
-    throw error;
-  }
-  return result;
-}
-function validEmail(value){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)&&value.length<=254}
-function validateRegister(){
-  let valid=true;
-  const name=$("register-name"),email=$("register-email"),password=$("register-password"),confirm=$("register-confirm-password");
-  [name,email,password,confirm].forEach(clearField);
-  if(name.value.trim().length<2||name.value.trim().length>100){setFieldError(name,"Enter your full name using 2–100 characters.");valid=false}
-  if(!validEmail(email.value.trim())){setFieldError(email,"Enter a valid email address, for example caroline@example.com.");valid=false}
-  if(password.value.length<12||password.value.length>128){setFieldError(password,"Password must contain between 12 and 128 characters.");valid=false}
-  if(confirm.value!==password.value||!confirm.value){setFieldError(confirm,"Please enter the same password in both password fields.");valid=false}
-  return valid;
-}
-function validateLogin(){
-  let valid=true;
-  const email=$("login-email"),password=$("login-password");
-  clearField(email);clearField(password);
-  if(!validEmail(email.value.trim())){setFieldError(email,"Enter a valid email address.");valid=false}
-  if(!password.value){setFieldError(password,"Enter your password.");valid=false}
-  return valid;
-}
-["register-name","register-email","register-password","register-confirm-password","login-email","login-password"].forEach(id=>{
-  const input=$(id);
-  input.addEventListener("input",()=>{
-    clearField(input);
-    if(id==="register-password"&&$("register-confirm-password").value)clearField($("register-confirm-password"));
-    if(id==="register-confirm-password"&&input.value!==$("register-password").value)setFieldError(input,"The passwords do not match.");
-    if(id==="register-confirm-password"&&input.value===$("register-password").value)clearField(input);
-  });
-});
-document.querySelectorAll("[data-toggle]").forEach(button=>button.addEventListener("click",()=>{
-  const input=$(button.dataset.toggle);
-  const show=input.type==="password";
-  input.type=show?"text":"password";
-  button.textContent=show?"Hide":"Show";
-}));
 
-registerForm.addEventListener("submit",async event=>{
-  event.preventDefault();clearMessages();
-  if(!validateRegister()){
-    showMessage("Please correct the fields marked in red.","error");
-    const first=registerForm.querySelector(".invalid");if(first)first.focus();
-    return;
-  }
-  const button=registerForm.querySelector('[type="submit"]');
-  button.disabled=true;button.textContent="Creating account…";
-  showMessage("Creating your account…");
-  try{
-    const result=await accountRequest("register",{
-      full_name:$("register-name").value.trim(),
-      email:$("register-email").value.trim().toLowerCase(),
-      password:$("register-password").value
-    });
-    registerForm.reset();
-    showAccount("login");
-    showMessage(result.message||"Your account has been created. Please log in using your email and password.","success");
-    $("login-email").value="";
-    $("login-password").value="";
-  }catch(error){
-    const msg=error.apiMessage||error.message;
-    if(error.status===409){
-      setFieldError($("register-email"),"This email already has a ZAVO account. Please log in instead.");
-      $("register-email").focus();
-      showMessage("Account not created. Check the email field or choose Log in instead.","error");
-    }else if(/full name/i.test(msg))setFieldError($("register-name"),msg);
-    else if(/email/i.test(msg))setFieldError($("register-email"),msg);
-    else if(/password/i.test(msg))setFieldError($("register-password"),msg);
-    else showMessage(networkMessage(error,"create your account"),"error");
-  }finally{button.disabled=false;button.textContent="Create account"}
-});
-
-loginForm.addEventListener("submit",async event=>{
-  event.preventDefault();clearMessages();
-  if(!validateLogin()){
-    showMessage("Please correct the fields marked in red.","error");
-    const first=loginForm.querySelector(".invalid");if(first)first.focus();
-    return;
-  }
-  const button=loginForm.querySelector('[type="submit"]');
-  button.disabled=true;button.textContent="Logging in…";
-  try{
-    const result=await accountRequest("login",{
-      email:$("login-email").value.trim().toLowerCase(),
-      password:$("login-password").value
-    });
-    if(!result.token)throw new Error("The server did not return a login session. Please try again.");
-    sessionStorage.setItem("zavoToken",result.token);
-    loginForm.reset();registerForm.hidden=true;loginForm.hidden=true;signedInPanel.hidden=false;
-    accountTitle.textContent="You're logged in";
-    accountIntro.textContent="You can continue browsing products.";
-    signedInMessage.textContent=`Welcome, ${result.user?.full_name||"ZAVO customer"}.`;
-    showMessage("Login successful.","success");updateLoginButton(true);
-  }catch(error){
-    if(error.status===401){
-      setFieldError($("login-password"),"The email or password is incorrect. Check both details and try again.");
-      $("login-password").focus();
-      showMessage("Login unsuccessful. Check your email and password.","error");
-    }else if(error.status===403){
-      showMessage(error.apiMessage||"This account is not active. Please contact ZAVO support.","error");
-    }else{
-      showMessage(networkMessage(error,"log you in"),"error");
+    function saveToken(value) {
+      if (value) sessionStorage.setItem("zavoToken", value);
+      else sessionStorage.removeItem("zavoToken");
     }
-  }finally{button.disabled=false;button.textContent="Log in"}
-});
 
-$("logout-button").addEventListener("click",async()=>{
-  const button=$("logout-button");button.disabled=true;
-  try{
-    if(token())await accountRequest("logout",{},token());
-    sessionStorage.removeItem("zavoToken");updateLoginButton(false);
-    showAccount("login");showMessage("You have logged out.","success");
-  }catch(error){
-    /* Clear the browser session even if the server cannot be reached. */
-    sessionStorage.removeItem("zavoToken");updateLoginButton(false);
-    showAccount("login");
-    showMessage("You have been logged out on this device. The server could not confirm the session removal; reconnect and try again if needed.","error");
-  }finally{button.disabled=false}
-});
-
-/* GOOGLE SIGN-IN */
-function initializeGoogleSignIn(){
-  if(!googleContainer)return;
-  if(location.hostname!=="zavo-store.pages.dev"){
-    googleNote.textContent="For the official sign-in experience, open https://zavo-store.pages.dev. The GitHub preview may not be authorized by Google.";
-  }
-  if(!GOOGLE_CLIENT_ID){googleNote.textContent="Google sign-in is not configured yet.";return}
-  if(!window.google?.accounts?.id){
-    googleNote.textContent="Google sign-in could not load. Check your internet connection and reload this page.";
-    return;
-  }
-  try{
-    google.accounts.id.initialize({
-      client_id:GOOGLE_CLIENT_ID,
-      callback:handleGoogleCredential,
-      auto_select:false
-    });
-    googleContainer.innerHTML="";
-    const availableWidth=Math.max(180,Math.floor((document.querySelector(".account-box")?.clientWidth||390)-40));
-    google.accounts.id.renderButton(googleContainer,{
-      type:"standard",theme:"outline",size:"large",text:"continue_with",
-      shape:"rectangular",width:Math.min(availableWidth,350),logo_alignment:"left"
-    });
-    if(location.hostname==="zavo-store.pages.dev")googleNote.textContent="Sign in securely with your Google account.";
-  }catch(error){
-    console.error("Google initialization error:",error);
-    googleNote.textContent="Google sign-in could not be initialized. Check that this website address is authorized in Google Cloud.";
-  }
-}
-async function handleGoogleCredential(googleResponse){
-  clearMessages();
-  showMessage("Checking your Google sign-in…");
-  try{
-    if(!googleResponse?.credential)throw new Error("Google did not provide a sign-in credential. Please try again.");
-    const result=await accountRequest("google",{credential:googleResponse.credential});
-    if(!result.success||!result.token)throw new Error("ZAVO did not return a valid login session. Please try again.");
-    sessionStorage.setItem("zavoToken",result.token);
-    registerForm.reset();loginForm.reset();
-    registerForm.hidden=true;loginForm.hidden=true;signedInPanel.hidden=false;
-    accountTitle.textContent="You're logged in";
-    accountIntro.textContent="You can continue browsing products.";
-    signedInMessage.textContent=`Welcome, ${result.user?.full_name||"ZAVO customer"}.`;
-    showMessage("Google sign-in successful.","success");updateLoginButton(true);
-  }catch(error){
-    console.error("ZAVO Google sign-in error:",error);
-    if(error.status===409){
-      showMessage("A ZAVO account already exists with this Google email. Log in using that account first. Linking Google to an existing account is not enabled yet.","error");
-    }else if(error.status===401){
-      showMessage("Google could not verify this sign-in. Try again, or log in using your ZAVO email and password.","error");
-    }else{
-      showMessage(networkMessage(error,"complete Google sign-in"),"error");
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[character]);
     }
-  }
-}
-async function checkSavedAccount(){
-  if(!token())return;
-  try{await accountRequest("me",null,token());updateLoginButton(true)}
-  catch{sessionStorage.removeItem("zavoToken");updateLoginButton(false)}
-}
-checkSavedAccount();
-window.addEventListener("load",initializeGoogleSignIn);
-window.addEventListener("resize",()=>{
-  if(window.google?.accounts?.id&&panel.classList.contains("open"))initializeGoogleSignIn();
-});
-</script>
+
+    function safeMediaURL(value) {
+      if (typeof value !== "string" || !value.trim()) return "";
+      try {
+        const parsed = new URL(value, window.location.href);
+        if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return "";
+        return parsed.href;
+      } catch {
+        return "";
+      }
+    }
+
+    function setMessage(element, message, type = "") {
+      element.textContent = message;
+      element.className = "status-message" + (type ? " " + type : "");
+      element.classList.remove("hidden");
+    }
+
+    function clearMessage(element) {
+      element.textContent = "";
+      element.className = "status-message hidden";
+    }
+
+    function showCatalogueMessage(message, type = "") {
+      setMessage($("catalogue-notice"), message, type);
+    }
+
+    async function apiRequest(path, options = {}) {
+      const headers = { ...(options.headers || {}) };
+      if (options.body !== undefined) headers["Content-Type"] = "application/json";
+
+      if (options.auth) {
+        const token = getToken();
+        if (token) headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${API_URL}${path}`, {
+        method: options.method || "GET",
+        headers,
+        body: options.body === undefined ? undefined : JSON.stringify(options.body)
+      });
+
+      let result = {};
+      try {
+        result = await response.json();
+      } catch {
+        result = {};
+      }
+
+      if (!response.ok || result.success === false) {
+        const error = new Error(
+          result.error || result.message || `Request failed (${response.status}).`
+        );
+        error.status = response.status;
+        throw error;
+      }
+
+      return result;
+    }
+
+    function formatPrice(product) {
+      const currency = String(product.currency || "KES").toUpperCase();
+
+      // API product prices are stored in minor currency units.
+      const raw = product.price_minor !== undefined
+        ? Number(product.price_minor) / 100
+        : Number(product.price);
+
+      if (!Number.isFinite(raw) || raw < 0) return "Price unavailable";
+
+      try {
+        return new Intl.NumberFormat("en-KE", {
+          style: "currency",
+          currency,
+          maximumFractionDigits: 2
+        }).format(raw);
+      } catch {
+        return `${currency} ${raw.toFixed(2)}`;
+      }
+    }
+
+    function getMediaList(product) {
+      const candidates = [];
+
+      if (Array.isArray(product.media)) candidates.push(...product.media);
+      if (Array.isArray(product.images)) candidates.push(...product.images);
+      if (Array.isArray(product.videos)) candidates.push(...product.videos);
+
+      if (product.image_url) {
+        candidates.push({ media_url: product.image_url, media_type: "image" });
+      }
+
+      if (product.video_url) {
+        candidates.push({ media_url: product.video_url, media_type: "video" });
+      }
+
+      return candidates.map((item) => {
+        if (typeof item === "string") {
+          return { url: safeMediaURL(item), type: "image" };
+        }
+
+        const url = safeMediaURL(
+          item.media_url || item.url || item.src || item.image_url || item.video_url
+        );
+
+        let type = String(item.media_type || item.type || "").toLowerCase();
+        if (type !== "video" && type !== "image") {
+          type = /\.(mp4|webm|ogg)(\?.*)?$/i.test(url) ? "video" : "image";
+        }
+
+        return { url, type };
+      }).filter((item) => item.url);
+    }
+
+    function makeProductCard(product) {
+      const card = document.createElement("article");
+      card.className = "product-card";
+
+      const media = document.createElement("div");
+      media.className = "product-media";
+
+      const mediaList = getMediaList(product);
+      const first = mediaList[0];
+
+      if (first && first.type === "video") {
+        const video = document.createElement("video");
+        video.src = first.url;
+        video.controls = true;
+        video.preload = "metadata";
+        video.playsInline = true;
+        video.setAttribute("aria-label", `Video for ${product.title || "product"}`);
+        media.appendChild(video);
+      } else if (first) {
+        const img = document.createElement("img");
+        img.src = first.url;
+        img.alt = String(product.title || "ZAVO product");
+        img.loading = "lazy";
+        img.onerror = () => {
+          media.replaceChildren();
+          const placeholder = document.createElement("div");
+          placeholder.className = "media-placeholder";
+          placeholder.textContent = "📦";
+          placeholder.setAttribute("aria-label", "Product image unavailable");
+          media.appendChild(placeholder);
+        };
+        media.appendChild(img);
+      } else {
+        const placeholder = document.createElement("div");
+        placeholder.className = "media-placeholder";
+        placeholder.textContent = "📦";
+        placeholder.setAttribute("aria-label", "No product image available");
+        media.appendChild(placeholder);
+      }
+
+      const info = document.createElement("div");
+      info.className = "product-info";
+
+      const category = document.createElement("div");
+      category.className = "product-category";
+      category.textContent = String(product.category || "General");
+
+      const title = document.createElement("h3");
+      title.className = "product-title";
+      title.textContent = String(product.title || "Untitled product");
+
+      const description = document.createElement("p");
+      description.className = "product-description";
+      const descriptionText = String(product.description || "").trim();
+      description.textContent = descriptionText
+        ? descriptionText.slice(0, 150) + (descriptionText.length > 150 ? "…" : "")
+        : "More product details will be provided when available.";
+
+      const price = document.createElement("div");
+      price.className = "product-price";
+      price.textContent = formatPrice(product);
+
+      const stock = document.createElement("div");
+      stock.className = "product-stock";
+      const quantity = Number(product.stock);
+      stock.textContent = Number.isFinite(quantity) && quantity > 0
+        ? "Listed as available"
+        : "Availability to be confirmed";
+
+      const action = document.createElement("button");
+      action.type = "button";
+      action.className = "button button-outline";
+      action.textContent = "Purchases coming soon";
+      action.disabled = true;
+      action.title = "Checkout is not available yet.";
+
+      info.append(category, title, description, price, stock, action);
+      card.append(media, info);
+      return card;
+    }
+
+    function renderProducts() {
+      const query = $("product-search").value.trim().toLowerCase();
+      const selectedCategory = $("category-filter").value;
+
+      const filtered = allProducts.filter((product) => {
+        const title = String(product.title || "").toLowerCase();
+        const description = String(product.description || "").toLowerCase();
+        const category = String(product.category || "General");
+
+        const matchesQuery =
+          !query ||
+          title.includes(query) ||
+          description.includes(query) ||
+          category.toLowerCase().includes(query);
+
+        const matchesCategory =
+          !selectedCategory || category === selectedCategory;
+
+        return matchesQuery && matchesCategory;
+      });
+
+      const grid = $("product-grid");
+      grid.replaceChildren();
+
+      for (const product of filtered) {
+        grid.appendChild(makeProductCard(product));
+      }
+
+      const empty = $("empty-state");
+      if (filtered.length === 0) {
+        empty.classList.remove("hidden");
+        $("empty-title").textContent = allProducts.length
+          ? "No matching products"
+          : "No published products available";
+        $("empty-description").textContent = allProducts.length
+          ? "Try another search term or choose a different category."
+          : "Published products will appear here when they are available from the ZAVO API.";
+      } else {
+        empty.classList.add("hidden");
+      }
+    }
+
+    function populateCategories() {
+      const select = $("category-filter");
+      const previous = select.value;
+      const categories = [...new Set(
+        allProducts.map((product) => String(product.category || "General"))
+      )].sort((a, b) => a.localeCompare(b));
+
+      select.replaceChildren(new Option("All categories", ""));
+
+      for (const category of categories) {
+        select.add(new Option(category, category));
+      }
+
+      if (categories.includes(previous)) select.value = previous;
+    }
+
+    async function loadProducts() {
+      const refreshButton = $("refresh-products");
+      refreshButton.disabled = true;
+      showCatalogueMessage("Loading products from the ZAVO API…");
+
+      try {
+        const result = await apiRequest("/api/products");
+        const products = Array.isArray(result.products) ? result.products : [];
+
+        allProducts = products.filter((product) =>
+          product && typeof product === "object"
+        );
+
+        populateCategories();
+        renderProducts();
+
+        if (allProducts.length) {
+          showCatalogueMessage(
+            `Loaded ${allProducts.length} product${allProducts.length === 1 ? "" : "s"}. Checkout and payment are not yet enabled.`
+          );
+        } else {
+          showCatalogueMessage(
+            "The API responded successfully, but no published products are currently available.",
+            "success"
+          );
+        }
+      } catch (error) {
+        allProducts = [];
+        populateCategories();
+        renderProducts();
+
+        showCatalogueMessage(
+          `Unable to load products. ${error.message || "Check your internet connection and try again."}`,
+          "error"
+        );
+      } finally {
+        refreshButton.disabled = false;
+      }
+    }
+
+    function updateHeaderAccount() {
+      const loggedIn = Boolean(currentUser && getToken());
+      $("open-login").textContent = loggedIn ? "My account" : "Log in";
+      $("open-register").textContent = loggedIn ? "Account" : "Sign up";
+    }
+
+    function setAccountTab(tab) {
+      activeAccountTab = tab;
+      $("tab-login").classList.toggle("active", tab === "login");
+      $("tab-register").classList.toggle("active", tab === "register");
+      $("login-panel").classList.toggle("hidden", tab !== "login");
+      $("register-panel").classList.toggle("hidden", tab !== "register");
+      $("account-panel").classList.add("hidden");
+      $("account-tabs").classList.remove("hidden");
+      $("account-title").textContent = tab === "login" ? "Welcome back" : "Join ZAVO";
+      $("account-intro").textContent = tab === "login"
+        ? "Log in to your ZAVO account."
+        : "Create your ZAVO account.";
+      clearMessage($("account-message"));
+    }
+
+    function showAccountDialog(tab = "login") {
+      lastFocusedElement = document.activeElement;
+      $("account-backdrop").classList.remove("hidden");
+
+      if (currentUser && getToken()) {
+        showSignedInAccount();
+      } else {
+        setAccountTab(tab);
+        setTimeout(() => {
+          const target = tab === "register" ? $("register-name") : $("login-email");
+          target.focus();
+          initializeGoogleSignIn();
+        }, 50);
+      }
+    }
+
+    function closeAccountDialog() {
+      $("account-backdrop").classList.add("hidden");
+      if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
+        lastFocusedElement.focus();
+      }
+    }
+
+    function showSignedInAccount() {
+      $("account-tabs").classList.add("hidden");
+      $("login-panel").classList.add("hidden");
+      $("register-panel").classList.add("hidden");
+      $("account-panel").classList.remove("hidden");
+      $("account-title").textContent = "Your account";
+      $("account-intro").textContent = "You are signed in to ZAVO.";
+
+      $("account-name").textContent = currentUser.full_name || currentUser.name || "ZAVO customer";
+      $("account-email").textContent = currentUser.email || "";
+      const roles = Array.isArray(currentUser.roles) ? currentUser.roles : [];
+      $("account-roles").textContent = roles.length ? `Account roles: ${roles.join(", ")}` : "";
+      clearMessage($("account-message"));
+    }
+
+    async function verifyExistingSession() {
+      const token = getToken();
+      if (!token) {
+        currentUser = null;
+        updateHeaderAccount();
+        return;
+      }
+
+      try {
+        const result = await apiRequest("/api/auth/me", { auth: true });
+        currentUser = result.user || result;
+        updateHeaderAccount();
+      } catch {
+        saveToken(null);
+        currentUser = null;
+        updateHeaderAccount();
+      }
+    }
+
+    function setFormBusy(formId, busy) {
+      const form = $(formId);
+      for (const control of form.querySelectorAll("button, input")) {
+        control.disabled = busy;
+      }
+    }
+
+    $("login-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearMessage($("account-message"));
+
+      const email = $("login-email").value.trim();
+      const password = $("login-password").value;
+
+      setFormBusy("login-form", true);
+
+      try {
+        const result = await apiRequest("/api/auth/login", {
+          method: "POST",
+          body: { email, password }
+        });
+
+        if (!result.token) throw new Error("The API did not return a login token.");
+
+        saveToken(result.token);
+        currentUser = result.user || null;
+
+        if (!currentUser || !currentUser.email) {
+          await verifyExistingSession();
+        } else {
+          updateHeaderAccount();
+        }
+
+        setMessage($("account-message"), "You are now signed in.", "success");
+        showSignedInAccount();
+      } catch (error) {
+        setMessage(
+          $("account-message"),
+          error.message || "Login failed. Please check your details and try again.",
+          "error"
+        );
+      } finally {
+        setFormBusy("login-form", false);
+      }
+    });
+
+    $("register-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearMessage($("account-message"));
+
+      const full_name = $("register-name").value.trim();
+      const email = $("register-email").value.trim();
+      const password = $("register-password").value;
+      const confirmation = $("register-confirm").value;
+
+      if (full_name.length < 2) {
+        setMessage($("account-message"), "Please enter your full name.", "error");
+        return;
+      }
+
+      if (password.length < 12) {
+        setMessage($("account-message"), "Your password must contain at least 12 characters.", "error");
+        return;
+      }
+
+      if (password !== confirmation) {
+        setMessage($("account-message"), "The passwords do not match.", "error");
+        $("register-confirm").focus();
+        return;
+      }
+
+      setFormBusy("register-form", true);
+
+      try {
+        await apiRequest("/api/auth/register", {
+          method: "POST",
+          body: { full_name, email, password }
+        });
+
+        $("register-form").reset();
+        setAccountTab("login");
+        $("login-email").value = email;
+
+        setMessage(
+          $("account-message"),
+          "Registration request submitted. You have not been signed in automatically. Email verification is not yet enabled on the current backend; sign-in depends on the server's account status.",
+          "success"
+        );
+
+        $("login-password").focus();
+      } catch (error) {
+        setMessage(
+          $("account-message"),
+          error.message || "Registration failed. Please try again.",
+          "error"
+        );
+      } finally {
+        setFormBusy("register-form", false);
+      }
+    });
+
+    async function logout() {
+      try {
+        if (getToken()) {
+          await apiRequest("/api/auth/logout", {
+            method: "POST",
+            auth: true,
+            body: {}
+          });
+        }
+      } catch {
+        // Clear local credentials even if the network is unavailable.
+      } finally {
+        saveToken(null);
+        currentUser = null;
+        updateHeaderAccount();
+        closeAccountDialog();
+      }
+    }
+
+    $("logout-button").addEventListener("click", logout);
+
+    function initializeGoogleSignIn() {
+      if (googleInitialized) {
+        renderGoogleButton();
+        return;
+      }
+
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+        return;
+      }
+
+      try {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredential,
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+        googleInitialized = true;
+        renderGoogleButton();
+      } catch {
+        setMessage(
+          $("account-message"),
+          "Google sign-in could not initialize. Check the Google OAuth configuration.",
+          "error"
+        );
+      }
+    }
+
+    function renderGoogleButton() {
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) return;
+
+      const target = $("google-button");
+      target.replaceChildren();
+
+      try {
+        window.google.accounts.id.renderButton(target, {
+          type: "standard",
+          theme: "outline",
+          size: "large",
+          text: "continue_with",
+          shape: "rectangular",
+          width: Math.min(360, target.clientWidth || 360)
+        });
+      } catch {
+        // Google Identity Services may not be available in this browser.
+      }
+    }
+
+    async function handleGoogleCredential(response) {
+      clearMessage($("account-message"));
+
+      if (!response || !response.credential) {
+        setMessage($("account-message"), "Google did not return a sign-in credential.", "error");
+        return;
+      }
+
+      try {
+        const result = await apiRequest("/api/auth/google", {
+          method: "POST",
+          body: { credential: response.credential }
+        });
+
+        if (!result.token) throw new Error("The API did not return a login token.");
+
+        saveToken(result.token);
+        currentUser = result.user || null;
+
+        if (!currentUser || !currentUser.email) {
+          await verifyExistingSession();
+        } else {
+          updateHeaderAccount();
+        }
+
+        showSignedInAccount();
+        setMessage($("account-message"), "Google sign-in successful.", "success");
+      } catch (error) {
+        saveToken(null);
+        currentUser = null;
+        updateHeaderAccount();
+
+        setMessage(
+          $("account-message"),
+          error.message || "Google sign-in failed. Check the Worker and Google OAuth configuration.",
+          "error"
+        );
+      }
+    }
+
+    $("open-login").addEventListener("click", () => {
+      showAccountDialog("login");
+    });
+
+    $("open-register").addEventListener("click", () => {
+      showAccountDialog("register");
+    });
+
+    $("close-account").addEventListener("click", closeAccountDialog);
+
+    $("account-backdrop").addEventListener("click", (event) => {
+      if (event.target === $("account-backdrop")) closeAccountDialog();
+    });
+
+    $("tab-login").addEventListener("click", () => setAccountTab("login"));
+    $("tab-register").addEventListener("click", () => setAccountTab("register"));
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !$("account-backdrop").classList.contains("hidden")) {
+        closeAccountDialog();
+      }
+
+      if (event.key === "Tab" && !$("account-backdrop").classList.contains("hidden")) {
+        const dialog = $("account-dialog");
+        const focusable = [...dialog.querySelectorAll(
+          'button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])'
+        )].filter((element) => element.offsetParent !== null);
+
+        if (!focusable.length) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    });
+
+    $("product-search").addEventListener("input", renderProducts);
+    $("category-filter").addEventListener("change", renderProducts);
+    $("refresh-products").addEventListener("click", loadProducts);
+
+    // Initialize the page.
+    updateHeaderAccount();
+    verifyExistingSession();
+    loadProducts();
+
+    // Google Identity Services may load after the page's own script.
+    window.addEventListener("load", initializeGoogleSignIn);
+  </script>
 </body>
 </html>
