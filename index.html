@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +7,7 @@
 <meta name="theme-color" content="#174ea6">
 <meta name="description" content="Discover great products at competitive prices with ZAVO. Great Deals, Delivered.">
 <title>ZAVO | Great Deals, Delivered.</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <style>
 :root {
@@ -364,7 +366,11 @@ footer p, footer a { color: #dce7ff; font-size: 13px; }
 }
 .account-submit { background: var(--blue); color: white; flex: 1; }
 .account-switch { background: #eef3fb; color: var(--blue); }
-.account-message { font-size: 13px; overflow-wrap: anywhere; margin: 12px 0 0; }
+.account-message {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+  margin: 12px 0 0;
+}
 .account-divider {
   display: flex;
   align-items: center;
@@ -379,27 +385,18 @@ footer p, footer a { color: #dce7ff; font-size: 13px; }
   background: #e1e6ef;
   flex: 1;
 }
-.google-button {
+.google-signin-container {
   width: 100%;
-  border: 1px solid #d4dbe6;
-  background: white;
-  border-radius: 9px;
-  padding: 11px;
-  font-weight: 700;
-  color: #263445;
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
 }
-.google-button span {
-  display: inline-grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  margin-right: 7px;
-  border: 1px solid #e1e5ec;
-  border-radius: 50%;
-  font-weight: 900;
-  color: #4285f4;
+.google-note {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 7px 0 0;
+  text-align: center;
 }
-.google-note { font-size: 11px; color: var(--muted); margin: 7px 0 0; }
 [hidden] { display: none !important; }
 
 @media (max-width: 900px) {
@@ -472,12 +469,12 @@ footer p, footer a { color: #dce7ff; font-size: 13px; }
     </div>
 
     <div class="categories" id="categories" aria-label="Filter products">
-      <button class="chip active" data-category="All">All products</button>
-      <button class="chip" data-category="Home">Home</button>
-      <button class="chip" data-category="Fashion">Fashion</button>
-      <button class="chip" data-category="Beauty">Beauty</button>
-      <button class="chip" data-category="Tech">Tech</button>
-      <button class="chip" data-category="General">General</button>
+      <button class="chip active" data-category="All" type="button">All products</button>
+      <button class="chip" data-category="Home" type="button">Home</button>
+      <button class="chip" data-category="Fashion" type="button">Fashion</button>
+      <button class="chip" data-category="Beauty" type="button">Beauty</button>
+      <button class="chip" data-category="Tech" type="button">Tech</button>
+      <button class="chip" data-category="General" type="button">General</button>
     </div>
 
     <div class="products" id="product-list">
@@ -574,12 +571,9 @@ footer p, footer a { color: #dce7ff; font-size: 13px; }
 
     <div class="account-divider">OR</div>
 
-    <button class="google-button" id="google-signin" type="button">
-      <span>G</span> Continue with Google
-    </button>
+    <div id="google-signin-container" class="google-signin-container"></div>
     <p class="google-note" id="google-note">
-      Google sign-in is awaiting OAuth setup and server-side credential verification.
-      It is not active yet.
+      Sign in securely with your Google account.
     </p>
 
     <p class="account-message" id="account-message" role="status" aria-live="polite"></p>
@@ -589,8 +583,13 @@ footer p, footer a { color: #dce7ff; font-size: 13px; }
 <script>
 "use strict";
 
+/* ZAVO API AND GOOGLE CONFIGURATION */
+
 const API_URL = "https://zavo-api.owinosylvester2025.workers.dev";
-const GOOGLE_CLIENT_ID = ""; // Keep empty until Google OAuth and server verification are configured.
+const GOOGLE_CLIENT_ID =
+  "776829851538-0qs24flt8ia16d6p3ir3fps9s7tmfbee.apps.googleusercontent.com";
+
+/* PRODUCT CATALOGUE */
 
 const search = document.getElementById("search");
 const productList = document.getElementById("product-list");
@@ -603,6 +602,7 @@ let category = "All";
 function formatPrice(amount, currency) {
   const n = Number(amount);
   if (!Number.isFinite(n)) return "Price unavailable";
+
   try {
     return new Intl.NumberFormat("en-KE", {
       style: "currency",
@@ -626,6 +626,7 @@ function escapeHTML(value) {
 
 function getSafeMediaURL(value) {
   if (typeof value !== "string" || !value.trim()) return "";
+
   try {
     const u = new URL(value);
     return u.protocol === "https:" || u.protocol === "http:" ? u.href : "";
@@ -634,10 +635,10 @@ function getSafeMediaURL(value) {
   }
 }
 
-function normalizeMedia(p) {
+function normalizeMedia(product) {
   const media = [];
-  const images = Array.isArray(p.images) ? p.images : [];
-  const videos = Array.isArray(p.videos) ? p.videos : [];
+  const images = Array.isArray(product.images) ? product.images : [];
+  const videos = Array.isArray(product.videos) ? product.videos : [];
 
   images.forEach(value => {
     const url = getSafeMediaURL(value);
@@ -650,7 +651,7 @@ function normalizeMedia(p) {
   });
 
   if (!media.length) {
-    const url = getSafeMediaURL(p.image_url);
+    const url = getSafeMediaURL(product.image_url);
     if (url) media.push({ type: "image", url });
   }
 
@@ -672,13 +673,13 @@ function renderOptionalList(label, value) {
     ${items.map(escapeHTML).join(", ")}</p>`;
 }
 
-function renderRating(p) {
-  const raw = p.rating ?? p.average_rating;
+function renderRating(product) {
+  const raw = product.rating ?? product.average_rating;
   const number = Number(raw);
   const hasRating = raw !== null && raw !== undefined &&
     String(raw).trim() !== "" && Number.isFinite(number) &&
     number >= 0 && number <= 5;
-  const review = String(p.review_text ?? p.review ?? "").trim();
+  const review = String(product.review_text ?? product.review ?? "").trim();
 
   let output = "";
 
@@ -694,9 +695,9 @@ function renderRating(p) {
   return output;
 }
 
-function renderMedia(p, index) {
-  const media = normalizeMedia(p);
-  const title = escapeHTML(p.title || "Product");
+function renderMedia(product, index) {
+  const media = normalizeMedia(product);
+  const title = escapeHTML(product.title || "Product");
 
   let main = '<span class="fallback-icon" aria-label="Product image unavailable">🛍️</span>';
 
@@ -730,6 +731,7 @@ function attachMediaHandlers(filtered) {
     element.addEventListener("error", () => {
       const art = element.closest(".product-art");
       if (!art) return;
+
       element.remove();
 
       if (!art.querySelector(".fallback-icon")) {
@@ -744,6 +746,8 @@ function attachMediaHandlers(filtered) {
   productList.querySelectorAll(".media-thumb").forEach(button => {
     button.addEventListener("click", () => {
       const product = filtered[Number(button.dataset.productIndex)];
+      if (!product) return;
+
       const media = normalizeMedia(product)[Number(button.dataset.mediaIndex)];
       const card = button.closest(".card");
       const art = card?.querySelector(".product-art");
@@ -761,6 +765,7 @@ function attachMediaHandlers(filtered) {
       });
 
       const element = art.querySelector(".main-media");
+
       if (element) {
         element.addEventListener("error", () => {
           art.innerHTML = '<span class="fallback-icon">🛍️</span>';
@@ -792,10 +797,12 @@ function renderProducts() {
       ].some(value => value.toLowerCase().includes(query));
   });
 
-  count.textContent = `${filtered.length} ${filtered.length === 1 ? "product" : "products"}`;
+  count.textContent =
+    `${filtered.length} ${filtered.length === 1 ? "product" : "products"}`;
 
   if (!filtered.length) {
-    productList.innerHTML = '<p class="empty">No products found in this category.</p>';
+    productList.innerHTML =
+      '<p class="empty">No products found in this category.</p>';
     return;
   }
 
@@ -880,14 +887,21 @@ const accountIntro = document.getElementById("account-intro");
 const accountMessage = document.getElementById("account-message");
 const signedInPanel = document.getElementById("signed-in-panel");
 const signedInMessage = document.getElementById("signed-in-message");
-const googleButton = document.getElementById("google-signin");
+const googleContainer = document.getElementById("google-signin-container");
+const googleNote = document.getElementById("google-note");
 
 function token() {
   return sessionStorage.getItem("zavoToken");
 }
 
+function updateLoginButton(isLoggedIn) {
+  document.getElementById("open-login").textContent =
+    isLoggedIn ? "My account" : "Log in";
+}
+
 function showAccount(mode) {
   panel.classList.add("open");
+
   registerForm.hidden = mode !== "register";
   loginForm.hidden = mode !== "login";
   signedInPanel.hidden = true;
@@ -896,7 +910,9 @@ function showAccount(mode) {
     ? "Create your ZAVO account"
     : "Log in to ZAVO";
 
-  accountIntro.textContent = "You can browse ZAVO products without an account.";
+  accountIntro.textContent =
+    "You can browse ZAVO products without an account.";
+
   accountMessage.textContent = "";
 }
 
@@ -904,8 +920,33 @@ function closeAccount() {
   panel.classList.remove("open");
 }
 
-document.getElementById("open-login").addEventListener("click", () => showAccount("login"));
-document.getElementById("open-register").addEventListener("click", () => showAccount("register"));
+document.getElementById("open-login").addEventListener("click", async () => {
+  if (token()) {
+    try {
+      const result = await accountRequest("me", null, token());
+      registerForm.hidden = true;
+      loginForm.hidden = true;
+      signedInPanel.hidden = false;
+      accountTitle.textContent = "Your ZAVO account";
+      accountIntro.textContent = "You can continue browsing products.";
+      signedInMessage.textContent =
+        `Welcome back, ${result.user?.full_name || "ZAVO customer"}.`;
+      accountMessage.textContent = "";
+      panel.classList.add("open");
+      return;
+    } catch {
+      sessionStorage.removeItem("zavoToken");
+      updateLoginButton(false);
+    }
+  }
+
+  showAccount("login");
+});
+
+document.getElementById("open-register").addEventListener("click", () => {
+  showAccount("register");
+});
+
 document.getElementById("close-account").addEventListener("click", closeAccount);
 
 panel.addEventListener("click", event => {
@@ -916,8 +957,13 @@ document.addEventListener("keydown", event => {
   if (event.key === "Escape") closeAccount();
 });
 
-document.getElementById("switch-login").addEventListener("click", () => showAccount("login"));
-document.getElementById("switch-register").addEventListener("click", () => showAccount("register"));
+document.getElementById("switch-login").addEventListener("click", () => {
+  showAccount("login");
+});
+
+document.getElementById("switch-register").addEventListener("click", () => {
+  showAccount("register");
+});
 
 async function accountRequest(path, data, sessionToken) {
   const headers = { "Content-Type": "application/json" };
@@ -926,12 +972,16 @@ async function accountRequest(path, data, sessionToken) {
     headers.Authorization = `Bearer ${sessionToken}`;
   }
 
-  const response = await fetch(`${API_URL}/api/auth/${path}`, {
+  const options = {
     method: path === "me" ? "GET" : "POST",
-    headers,
-    body: path === "me" ? undefined : JSON.stringify(data || {})
-  });
+    headers
+  };
 
+  if (path !== "me") {
+    options.body = JSON.stringify(data || {});
+  }
+
+  const response = await fetch(`${API_URL}/api/auth/${path}`, options);
   const result = await response.json().catch(() => ({}));
 
   if (!response.ok) {
@@ -954,7 +1004,8 @@ registerForm.addEventListener("submit", async event => {
 
     registerForm.reset();
     showAccount("login");
-    accountMessage.textContent = result.message || "Account created. Please log in.";
+    accountMessage.textContent =
+      result.message || "Account created. Please log in.";
   } catch (error) {
     accountMessage.textContent = error.message;
   } finally {
@@ -990,7 +1041,7 @@ loginForm.addEventListener("submit", async event => {
     accountIntro.textContent = "You can continue browsing products.";
     accountMessage.textContent = "Login successful.";
 
-    document.getElementById("open-login").textContent = "My account";
+    updateLoginButton(true);
   } catch (error) {
     accountMessage.textContent = error.message;
   } finally {
@@ -1009,12 +1060,12 @@ document.getElementById("logout-button").addEventListener("click", async () => {
     }
 
     sessionStorage.removeItem("zavoToken");
-    document.getElementById("open-login").textContent = "Log in";
-
+    updateLoginButton(false);
     showAccount("login");
     accountMessage.textContent = "You have logged out.";
   } catch (error) {
-    accountMessage.textContent = `Logout could not be confirmed: ${error.message}`;
+    accountMessage.textContent =
+      `Logout could not be confirmed: ${error.message}`;
   } finally {
     button.disabled = false;
   }
@@ -1025,23 +1076,108 @@ async function checkSavedAccount() {
 
   try {
     const result = await accountRequest("me", null, token());
-
-    document.getElementById("open-login").textContent = "My account";
+    updateLoginButton(true);
     signedInMessage.textContent =
       `Welcome back, ${result.user?.full_name || "ZAVO customer"}.`;
   } catch {
     sessionStorage.removeItem("zavoToken");
-    document.getElementById("open-login").textContent = "Log in";
+    updateLoginButton(false);
   }
 }
 
+/* GOOGLE SIGN-IN */
+
+function initializeGoogleSignIn() {
+  if (!googleContainer) return;
+
+  if (!GOOGLE_CLIENT_ID) {
+    googleNote.textContent =
+      "Google sign-in is not configured yet.";
+    return;
+  }
+
+  if (!window.google?.accounts?.id) {
+    googleNote.textContent =
+      "Google sign-in could not load. Check your internet connection and reload this page.";
+    return;
+  }
+
+  try {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCredential
+    });
+
+    googleContainer.innerHTML = "";
+
+    google.accounts.id.renderButton(googleContainer, {
+      type: "standard",
+      theme: "outline",
+      size: "large",
+      text: "continue_with",
+      shape: "rectangular",
+      width: Math.max(
+        220,
+        Math.min(
+          350,
+          (document.querySelector(".account-box")?.clientWidth || 390) - 48
+        )
+      )
+    });
+
+    googleNote.textContent =
+      "Sign in securely with your Google account.";
+  } catch (error) {
+    console.error("Google sign-in initialization error:", error);
+    googleNote.textContent =
+      "Google sign-in could not be initialized. Check the Google OAuth settings.";
+  }
+}
+
+async function handleGoogleCredential(googleResponse) {
+  accountMessage.textContent = "Verifying your Google account…";
+
+  try {
+    if (!googleResponse || !googleResponse.credential) {
+      throw new Error("Google did not return a valid sign-in credential.");
+    }
+
+    const result = await accountRequest("google", {
+      credential: googleResponse.credential
+    });
+
+    if (!result.success || !result.token) {
+      throw new Error("ZAVO did not return a valid login session.");
+    }
+
+    sessionStorage.setItem("zavoToken", result.token);
+
+    registerForm.reset();
+    loginForm.reset();
+    registerForm.hidden = true;
+    loginForm.hidden = true;
+    signedInPanel.hidden = false;
+
+    accountTitle.textContent = "You're logged in";
+    accountIntro.textContent = "You can continue browsing products.";
+    signedInMessage.textContent =
+      `Welcome, ${result.user?.full_name || "ZAVO customer"}.`;
+    accountMessage.textContent = "Google sign-in successful.";
+
+    updateLoginButton(true);
+  } catch (error) {
+    console.error("ZAVO Google sign-in error:", error);
+    accountMessage.textContent =
+      error.message || "Google sign-in failed. Please try again.";
+  }
+}
+
+/* STARTUP */
+
 checkSavedAccount();
 
-googleButton.addEventListener("click", () => {
-  accountMessage.textContent = GOOGLE_CLIENT_ID
-    ? "Google sign-in still needs a verified server endpoint. Do not proceed until that endpoint is implemented."
-    : "Google sign-in is not activated yet. First configure Google OAuth and server-side credential verification; email sign-up and login use the ZAVO API.";
-});
+/* The Google library loads asynchronously, so wait until the page finishes loading. */
+window.addEventListener("load", initializeGoogleSignIn);
 </script>
 </body>
 </html>
