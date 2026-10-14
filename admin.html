@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#174ea6">
+  <title>ZAVO Admin | Marketplace Management</title>
+  <style>
+    :root {
+      --blue: #174ea6;
+      --yellow: #ffc928;
+      --bg: #f4f7fb;
+      --text: #172033;
+      --muted: #64748b;
+      --border: #dbe3ef;
+      --red: #b42318;
+      --green: #067647;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    header {
+      background: var(--blue);
+      color: white;
+      padding: 18px 16px;
+      border-bottom: 5px solid var(--yellow);
+    }
+
+    .head-inner, main {
+      width: min(1100px, 100%);
+      margin: auto;
+    }
+
+    header h1 { margin: 0 0 5px; font-size: 25px; }
+    header p { margin: 0; font-size: 14px; opacity: .9; }
+
+    main { padding: 16px; }
+
+    .panel {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px #10264a0a;
+    }
+
+    h2 { font-size: 19px; margin: 0 0 12px; }
+    h3 { font-size: 16px; margin: 0 0 10px; }
+    .muted { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .wide { grid-column: 1 / -1; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: white;
+      color: var(--text);
+      font: inherit;
+      font-size: 14px;
+    }
+
+    textarea { min-height: 85px; resize: vertical; }
+
+    button, .link-button {
+      display: inline-block;
+      border: 0;
+      border-radius: 8px;
+      padding: 11px 13px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      margin: 4px 4px 4px 0;
+      background: var(--blue);
+      color: white;
+    }
+
+    button.secondary { background: #e8eef8; color: var(--blue); }
+    button.warning { background: #fff0c2; color: #7a4b00; }
+    button.danger { background: #fee4e2; color: var(--red); }
+    button.success { background: #d1fadf; color: var(--green); }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .tabs button { margin: 0; }
+    .tabs button.active { background: var(--yellow); color: #172033; }
+
+    .status {
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #e8eef8;
+      margin: 10px 0;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .status.error { background: #fee4e2; color: #912018; }
+    .status.ok { background: #d1fadf; color: #05603a; }
+
+    .hidden { display: none !important; }
+
+    .item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px;
+      margin: 10px 0;
+      background: white;
+      overflow-wrap: anywhere;
+    }
+
+    .item-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+    .meta { font-size: 13px; line-height: 1.6; color: #475569; }
+    .pill {
+      display: inline-block;
+      border-radius: 20px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #e8eef8;
+      margin: 3px 3px 3px 0;
+    }
+
+    .danger-note {
+      border-left: 4px solid var(--red);
+      padding: 9px 11px;
+      background: #fff5f4;
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 10px 0;
+    }
+
+    .top-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    .top-actions button { flex: 1; min-width: 120px; }
+
+    @media (max-width: 560px) {
+      main { padding: 10px; }
+      .panel { padding: 13px; }
+      .grid { grid-template-columns: 1fr; }
+      .wide { grid-column: auto; }
+      header h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <h1>ZAVO Admin</h1>
+    <p>Marketplace management · Great Deals, Delivered.</p>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>Secure administrator connection</h2>
+    <p class="muted">
+      Sign in to ZAVO first. Enter the session token returned by the login API.
+      This page does not ask for or store your password.
+    </p>
+    <label for="apiToken">Administrator session token</label>
+    <input id="apiToken" type="password" autocomplete="off"
+      placeholder="Paste your session token here">
+    <div class="top-actions">
+      <button id="connectBtn" onclick="connectAdmin()">Connect and verify admin</button>
+      <button class="secondary" onclick="forgetToken()">Forget token</button>
+    </div>
+    <div id="connectionStatus" class="status">Not connected.</div>
+  </section>
+
+  <section id="workspace" class="hidden">
+    <div class="panel">
+      <div class="tabs">
+        <button id="tabProducts" class="active" onclick="showTab('products')">Products</button>
+        <button id="tabVendors" onclick="showTab('vendors')">Seller accounts</button>
+      </div>
+      <div id="globalStatus" class="status hidden"></div>
+    </div>
+
+    <section id="productsSection">
+      <div class="panel">
+        <h2 id="productFormTitle">Add a product</h2>
+        <p class="muted">
+          Prices are entered in the selected currency. KES 1,500 is saved as
+          150000 minor units. New listings are drafts unless you select Published.
+        </p>
+        <form id="productForm">
+          <input id="productId" type="hidden">
+          <div class="grid">
+            <div class="wide">
+              <label for="productTitle">Product title *</label>
+              <input id="productTitle" maxlength="200" required>
+            </div>
+            <div>
+              <label for="productCategory">Category *</label>
+              <input id="productCategory" maxlength="100" required
+                placeholder="e.g. Electronics">
+            </div>
+            <div>
+              <label for="productCurrency">Currency</label>
+              <select id="productCurrency">
+                <option value="KES">KES — Kenyan shilling</option>
+                <option value="USD">USD — US dollar</option>
+              </select>
+            </div>
+            <div>
+              <label for="productPrice">Selling price *</label>
+              <input id="productPrice" type="number" min="0" step="0.01" required>
+            </div>
+            <div>
+              <label for="productCost">Source cost</label>
+              <input id="productCost" type="number" min="0" step="0.01" value="0">
+            </div>
+            <div>
+              <label for="productStock">Available stock *</label>
+              <input id="productStock" type="number" min="0" step="1" value="1" required>
+            </div>
+            <div>
+              <label for="productSku">SKU / stock code</label>
+              <input id="productSku" maxlength="100">
+            </div>
+            <div class="wide">
+              <label for="productDescription">Description</label>
+              <textarea id="productDescription"></textarea>
+            </div>
+            <div>
+              <label for="productCountry">Country of origin</label>
+              <input id="productCountry" maxlength="100">
+            </div>
+            <div>
+              <label for="productReturn">Return policy</label>
+              <input id="productReturn" maxlength="500">
+            </div>
+            <div>
+              <label for="productStatus">Listing status</label>
+              <select id="productStatus">
+                <option value="draft">Draft — hidden from customers</option>
+                <option value="published">Published — eligible to display</option>
+              </select>
+            </div>
+            <div>
+              <label for="productVendor">Vendor profile ID (optional)</label>
+              <input id="productVendor" placeholder="Blank uses first active vendor">
+            </div>
+          </div>
+          <div class="top-actions" style="margin-top:12px">
+            <button id="saveProductBtn" type="submit">Save product</button>
+            <button type="button" class="secondary" onclick="resetProductForm()">Clear form</button>
+            <button type="button" class="secondary" onclick="loadProducts()">Refresh products</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>Marketplace products</h2>
+        <p class="muted">Edit listings, change visibility or delete a listing when necessary.</p>
+        <div id="productsList">Connect as administrator to load products.</div>
+      </div>
+    </section>
+
+    <section id="vendorsSection" class="hidden">
+      <div class="panel">
+        <h2>Seller and supplier accounts</h2>
+        <p class="muted">
+          Approve legitimate applications. Give a warning with a reason, suspend
+          an account, restore a suspended account or ban an account for serious
+          or repeated violations.
+        </p>
+        <button onclick="loadVendors()">Refresh seller accounts</button>
+        <div id="vendorsList">Connect as administrator to load seller accounts.</div>
+      </div>
+    </section>
+  </section>
+
+  <section class="panel">
+    <h3>Administrator safety</h3>
+    <div class="danger-note">
+      Product deletion is permanent for the product database record and its
+      media records. It does not remove files stored in external image/video
+      storage or delete related order history.
+    </div>
+    <p class="muted">
+      Never share your session token. If the token expires, log in again and
+      provide the new token. Do not use ban or delete controls as a test.
+    </p>
+    <a class="link-button" href="./index.html">Return to storefront</a>
+  </section>
+</main>
+
+<script>
+  const API = "https://zavo-api.owinosylvester2025.workers.dev";
+
+  const $ = id => document.getElementById(id);
+  let token = "";
+  let productsCache = [];
+
+  function setStatus(id, message, type = "") {
+    const el = $(id);
+    el.textContent = message;
+    el.className = "status" + (type ? " " + type : "");
+    el.classList.remove("hidden");
+  }
+
+  function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;",
+      '"': "&quot;", "'": "&#39;"
+    }[char]));
+  }
+
+  function money(minor, currency = "KES") {
+    const amount = Number(minor || 0) / 100;
+    return currency + " " + amount.toLocaleString("en-KE", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  async function api(path, options = {}) {
+    const headers = {
+      "Content-Type": "application/json",
+      ...(token ? { "Authorization": "Bearer " + token } : {}),
+      ...(options.headers || {})
+    };
+
+    const response = await fetch(API + path, {
+      ...options,
+      headers
+    });
+
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error("The server returned an unreadable response.");
+    }
+
+    if (!response.ok || data.success === false) {
+      throw new Error(data.error || "The request failed.");
+    }
+
+    return data;
+  }
+
+  async function connectAdmin() {
+    token = $("apiToken").value.trim();
+
+    if (!token) {
+      setStatus("connectionStatus", "Paste your session token first.", "error");
+      return;
+    }
+
+    $("connectBtn").disabled = true;
+
+    try {
+      const data = await api("/api/auth/me");
+      if (!data.user || !Array.isArray(data.user.roles) ||
+          !data.user.roles.includes("admin")) {
+        throw new Error("This account does not have the administrator role.");
+      }
+
+      setStatus(
+        "connectionStatus",
+        "Verified administrator: " + data.user.email,
+        "ok"
+      );
+
+      $("workspace").classList.remove("hidden");
+      await Promise.all([loadProducts(), loadVendors()]);
+    } catch (error) {
+      $("workspace").classList.add("hidden");
+      setStatus("connectionStatus", error.message, "error");
+    } finally {
+      $("connectBtn").disabled = false;
+    }
+  }
+
+  function forgetToken() {
+    token = "";
+    $("apiToken").value = "";
+    $("workspace").classList.add("hidden");
+    setStatus("connectionStatus", "Token cleared from this page.");
+  }
+
+  function showTab(tab) {
+    $("productsSection").classList.toggle("hidden", tab !== "products");
+    $("vendorsSection").classList.toggle("hidden", tab !== "vendors");
+    $("tabProducts").classList.toggle("active", tab === "products");
+    $("tabVendors").classList.toggle("active", tab === "vendors");
+  }
+
+  async function loadProducts() {
+    $("productsList").textContent = "Loading products…";
+
+    try {
+      const data = await api("/api/admin/products");
+      productsCache = data.products || [];
+
+      if (!productsCache.length) {
+        $("productsList").textContent = "No products found.";
+        return;
+      }
+
+      $("productsList").innerHTML = productsCache.map(p => `
+        <article class="item">
+          <div class="item-title">${escapeHTML(p.title)}</div>
+          <span class="pill">${escapeHTML(p.status)}</span>
+          <span class="pill">${escapeHTML(p.category)}</span>
+          <div class="meta">
+            Selling price: <b>${escapeHTML(money(p.price_minor, p.currency))}</b><br>
+            Source cost: ${escapeHTML(money(p.cost_minor, p.currency))}<br>
+            Stock: ${escapeHTML(p.stock)}<br>
+            Vendor: ${escapeHTML(p.store_name || "Unknown vendor")}<br>
+            Vendor status: ${escapeHTML(p.vendor_status || "Unknown")}<br>
+            Product ID: ${escapeHTML(p.id)}
+          </div>
+          <button onclick="editProduct('${escapeHTML(p.id)}')">Edit</button>
+          <button class="secondary"
+            onclick="changeProductStatus('${escapeHTML(p.id)}',
+              '${p.status === "published" ? "draft" : "published"}')">
+            ${p.status === "published" ? "Unpublish" : "Publish"}
+          </button>
+          <button class="danger" onclick="deleteProduct('${escapeHTML(p.id)}')">
+            Delete listing
+          </button>
+        </article>
+      `).join("");
+    } catch (error) {
+      $("productsList").textContent = error.message;
+    }
+  }
+
+  function editProduct(id) {
+    const p = productsCache.find(item => item.id === id);
+    if (!p) return;
+
+    $("productId").value = p.id;
+    $("productTitle").value = p.title || "";
+    $("productCategory").value = p.category || "";
+    $("productCurrency").value = p.currency || "KES";
+    $("productPrice").value = (Number(p.price_minor || 0) / 100).toFixed(2);
+    $("productCost").value = (Number(p.cost_minor || 0) / 100).toFixed(2);
+    $("productStock").value = p.stock ?? 0;
+    $("productSku").value = p.sku || "";
+    $("productDescription").value = p.description || "";
+    $("productCountry").value = p.country_of_origin || "";
+    $("productReturn").value = p.return_policy || "";
+    $("productStatus").value = p.status || "draft";
+    $("productVendor").value = p.vendor_id || "";
+    $("productFormTitle").textContent = "Edit product";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function resetProductForm() {
+    $("productForm").reset();
+    $("productId").value = "";
+    $("productCost").value = "0";
+    $("productStock").value = "1";
+    $("productStatus").value = "draft";
+    $("productFormTitle").textContent = "Add a product";
+  }
+
+  function toMinorUnits(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number) || number < 0) {
+      throw new Error("Enter valid non-negative prices.");
+    }
+    const minor = Math.round(number * 100);
+    if (!Number.isSafeInteger(minor)) throw new Error("The price is too large.");
+    return minor;
+  }
+
+  $("productForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const id = $("productId").value.trim();
+    const payload = {
+      title: $("productTitle").value.trim(),
+      category: $("productCategory").value.trim(),
+      currency: $("productCurrency").value,
+      price_minor: toMinorUnits($("productPrice").value),
+      cost_minor: toMinorUnits($("productCost").value || "0"),
+      stock: Number($("productStock").value),
+      sku: $("productSku").value.trim(),
+      description: $("productDescription").value.trim(),
+      country_of_origin: $("productCountry").value.trim(),
+      return_policy: $("productReturn").value.trim(),
+      status: $("productStatus").value,
+      vendor_id: $("productVendor").value.trim()
+    };
+
+    if (!Number.isSafeInteger(payload.stock) || payload.stock < 0) {
+      setStatus("globalStatus", "Stock must be a non-negative whole number.", "error");
+      return;
+    }
+
+    $("saveProductBtn").disabled = true;
+
+    try {
+      let result;
+
+      if (id) {
+        result = await api("/api/admin/products/update", {
+          method: "POST",
+          body: JSON.stringify({ id, ...payload })
+        });
+
+        if (payload.status !== "draft" && payload.status !== "published") {
+          throw new Error("Invalid product status.");
+        }
+
+        await api("/api/admin/products/status", {
+          method: "POST",
+          body: JSON.stringify({ id, status: payload.status })
+        });
+      } else {
+        result = await api("/api/admin/products", {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+      }
+
+      setStatus("globalStatus", result.message || "Product saved.", "ok");
+      resetProductForm();
+      await loadProducts();
+    } catch (error) {
+      setStatus("globalStatus", error.message, "error");
+    } finally {
+      $("saveProductBtn").disabled = false;
+    }
+  });
+
+  async function changeProductStatus(id, status) {
+    const message = status === "published"
+      ? "Publish this product? It will be eligible to appear in the storefront."
+      : "Unpublish this product? Customers will no longer see it.";
+
+    if (!confirm(message)) return;
+
+    try {
+      const result = await api("/api/admin/products/status", {
+        method: "POST",
+        body: JSON.stringify({ id, status })
+      });
+
+      setStatus("globalStatus", result.message, "ok");
+      await loadProducts();
+    } catch (error) {
+      setStatus("globalStatus", error.message, "error");
+    }
+  }
+
+  async function deleteProduct(id) {
+    const p = productsCache.find(item => item.id === id);
+    const title = p ? p.title : id;
+
+    if (!confirm(
+      "PERMANENT ACTION\n\nDelete this product listing?\n\n" +
+      title + "\n\nIts product-media database records will also be deleted."
+    )) return;
+
+    if (!confirm("Confirm again: permanently delete this listing?")) return;
+
+    try {
+      const result = await api("/api/admin/products/delete", {
+        method: "POST",
+        body: JSON.stringify({ id })
+      });
+
+      setStatus("globalStatus", result.message, "ok");
+      await loadProducts();
+    } catch (error) {
+      setStatus("globalStatus", error.message, "error");
+    }
+  }
+
+  async function loadVendors() {
+    $("vendorsList").textContent = "Loading seller accounts…";
+
+    try {
+      const data = await api("/api/admin/vendors");
+      const vendors = data.vendors || [];
+
+      if (!vendors.length) {
+        $("vendorsList").textContent = "No seller profiles found.";
+        return;
+      }
+
+      $("vendorsList").innerHTML = vendors.map(v => `
+        <article class="item">
+          <div class="item-title">${escapeHTML(v.store_name || "Unnamed store")}</div>
+          <span class="pill">Vendor: ${escapeHTML(v.vendor_status)}</span>
+          <span class="pill">User: ${escapeHTML(v.account_status || "Unknown")}</span>
+          <div class="meta">
+            Contact: ${escapeHTML(v.full_name || "Not provided")}<br>
+            Email: ${escapeHTML(v.email || "Not provided")}<br>
+            Country: ${escapeHTML(v.country || "Not provided")}<br>
+            Vendor ID: ${escapeHTML(v.vendor_id)}<br>
+            User ID: ${escapeHTML(v.user_id || "Not linked")}
+          </div>
+          <button class="success" onclick="vendorAction('${escapeHTML(v.vendor_id)}','approve')">
+            Approve
+          </button>
+          <button class="warning" onclick="vendorAction('${escapeHTML(v.vendor_id)}','warn')">
+            Issue warning
+          </button>
+          <button class="danger" onclick="vendorAction('${escapeHTML(v.vendor_id)}','suspend')">
+            Suspend
+          </button>
+          <button class="secondary" onclick="vendorAction('${escapeHTML(v.vendor_id)}','restore')">
+            Restore
+          </button>
+          <button class="danger" onclick="vendorAction('${escapeHTML(v.vendor_id)}','ban')">
+            Ban account
+          </button>
+        </article>
+      `).join("");
+    } catch (error) {
+      $("vendorsList").textContent = error.message;
+    }
+  }
+
+  async function vendorAction(vendorId, action) {
+    let reason = "";
+
+    if (["warn", "suspend", "ban"].includes(action)) {
+      reason = prompt(
+        "Enter the reason for this " + action +
+        ". This reason will be recorded in the administrator log:"
+      );
+
+      if (reason === null) return;
+
+      reason = reason.trim();
+
+      if (!reason) {
+        alert("A reason is required for this action.");
+        return;
+      }
+    }
+
+    const messages = {
+      approve: "Approve this seller account?",
+      warn: "Record this warning?",
+      suspend: "Suspend this seller? Their sessions will be revoked and listings hidden.",
+      restore: "Restore this seller account?",
+      ban: "Ban this seller? Their sessions will be revoked and listings hidden."
+    };
+
+    if (!confirm(messages[action] || "Continue?")) return;
+
+    try {
+      const result = await api("/api/admin/vendors/action", {
+        method: "POST",
+        body: JSON.stringify({
+          vendor_id: vendorId,
+          action,
+          reason
+        })
+      });
+
+      setStatus("globalStatus", result.message, "ok");
+      await loadVendors();
+      await loadProducts();
+    } catch (error) {
+      setStatus("globalStatus", error.message, "error");
+    }
+  }
+</script>
+</body>
+  </html>
