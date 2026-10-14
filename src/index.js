@@ -1,10 +1,15 @@
 
-const CORS_HEADERS = {
+const ALLOWED_ORIGINS = new Set([
+  "https://zavo-store.pages.dev",
+  "https://zavo-ke.github.io"
+]);
+
+const BASE_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
   "Cache-Control": "no-store",
-  "Access-Control-Allow-Origin": "https://zavo-store.pages.dev",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Max-Age": "86400",
   "Vary": "Origin"
 };
 
@@ -19,11 +24,14 @@ const GOOGLE_KEYS_URL = "https://www.googleapis.com/oauth2/v3/certs";
 let googleKeysCache = null;
 let googleKeysExpiry = 0;
 
-function response(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: CORS_HEADERS
-  });
+function response(data, status = 200, origin = null) {
+  const headers = new Headers(BASE_HEADERS);
+
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
+    headers.set("Access-Control-Allow-Origin", origin);
+  }
+
+  return new Response(JSON.stringify(data), { status, headers });
 }
 
 function toBase64(bytes) {
@@ -49,6 +57,14 @@ function decodeBase64Url(value) {
   return fromBase64(padded);
 }
 
+async function sha256(text) {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(text)
+  );
+  return base64url(new Uint8Array(digest));
+}
+
 async function hashPassword(password, saltBytes) {
   const key = await crypto.subtle.importKey(
     "raw",
@@ -66,14 +82,6 @@ async function hashPassword(password, saltBytes) {
   }, key, 256);
 
   return toBase64(new Uint8Array(bits));
-}
-
-async function sha256(text) {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(text)
-  );
-  return base64url(new Uint8Array(digest));
 }
 
 async function createPasswordHash(password) {
@@ -256,7 +264,6 @@ async function getSession(request, db) {
   if (!header.startsWith("Bearer ")) return null;
 
   const token = header.slice(7).trim();
-
   if (!token || token.length > 200) return null;
 
   const result = await db.prepare(`
@@ -289,35 +296,39 @@ export default {
     const path = url.pathname;
     const origin = request.headers.get("Origin");
 
-    const headers = new Headers(CORS_HEADERS);
-
-    if (origin === "https://zavo-store.pages.dev") {
-      headers.set("Access-Control-Allow-Origin", origin);
-    } else {
-      headers.delete("Access-Control-Allow-Origin");
-    }
+    const json = (data, status = 200) => response(data, status, origin);
 
     if (request.method === "OPTIONS") {
-      if (origin && origin !== "https://zavo-store.pages.dev") {
-        return new Response(null, { status: 403, headers });
+      if (origin && !ALLOWED_ORIGINS.has(origin)) {
+        return new Response(null, {
+          status: 403,
+          headers: BASE_HEADERS
+        });
+      }
+
+      const headers = new Headers(BASE_HEADERS);
+      if (origin && ALLOWED_ORIGINS.has(origin)) {
+        headers.set("Access-Control-Allow-Origin", origin);
       }
 
       return new Response(null, { status: 204, headers });
     }
 
+    if (origin && !ALLOWED_ORIGINS.has(origin)) {
+      return json({
+        error: "This website is not authorised to connect to the ZAVO API."
+      }, 403);
+    }
+
     if (!env.DB) {
-      return new Response(
-        JSON.stringify({ error: "Database binding DB is missing." }),
-        { status: 500, headers }
-      );
+      return json({
+        error: "The ZAVO database is not connected. Please try again later."
+      }, 500);
     }
 
     try {
       if (path === "/" || path === "/api/health") {
-        return new Response(
-          JSON.stringify({ status: "ok", service: "zavo-api" }),
-          { status: 200, headers }
-        );
+        return json({ status: "ok", service: "zavo-api" });
       }
 
       if (path === "/api/auth/register" && request.method === "POST") {
@@ -326,7 +337,7 @@ export default {
         try {
           body = await request.json();
         } catch {
-          return response({ error: "Please send valid JSON." }, 400);
+          return json({ error: "Please check the form and submit it again." }, 400);
         }
 
         const fullName = String(body.full_name || "").trim();
@@ -334,18 +345,20 @@ export default {
         const password = String(body.password || "");
 
         if (fullName.length < 2 || fullName.length > 100) {
-          return response({
-            error: "Enter your full name (2–100 characters)."
+          return json({
+            error: "Enter your full name using 2–100 characters."
           }, 400);
         }
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
-          return response({ error: "Enter a valid email address." }, 400);
+          return json({
+            error: "Enter a valid email address, for example jane@example.com."
+          }, 400);
         }
 
         if (password.length < 12 || password.length > 128) {
-          return response({
-            error: "Password must be 12–128 characters."
+          return json({
+            error: "Your password must contain 12–128 characters."
           }, 400);
         }
 
@@ -354,27 +367,29 @@ export default {
         ).bind(email).first();
 
         if (existing) {
-          return response({
-            error: "An account with that email already exists."
+          return json({
+            error: "An account may already use this email. Try logging in instead."
           }, 409);
         }
 
         const id = crypto.randomUUID();
         const passwordHash = await createPasswordHash(password);
 
-        await env.DB.prepare(`
-          INSERT INTO users (id, full_name, email, password_hash, status)
-          VALUES (?, ?, ?, ?, 'active')
-        `).bind(id, fullName, email, passwordHash).run();
+        // Use a batch so the user and customer role are saved together.
+        await env.DB.batch([
+          env.DB.prepare(`
+            INSERT INTO users (id, full_name, email, password_hash, status)
+            VALUES (?, ?, ?, ?, 'active')
+          `).bind(id, fullName, email, passwordHash),
+          env.DB.prepare(`
+            INSERT INTO user_roles (user_id, role)
+            VALUES (?, 'customer')
+          `).bind(id)
+        ]);
 
-        await env.DB.prepare(`
-          INSERT INTO user_roles (user_id, role)
-          VALUES (?, 'customer')
-        `).bind(id).run();
-
-        return response({
+        return json({
           success: true,
-          message: "Account created. You can now log in."
+          message: "Your account has been created. Please log in using your email and password."
         }, 201);
       }
 
@@ -384,11 +399,15 @@ export default {
         try {
           body = await request.json();
         } catch {
-          return response({ error: "Please send valid JSON." }, 400);
+          return json({ error: "Please check your email and password fields." }, 400);
         }
 
         const email = String(body.email || "").trim().toLowerCase();
         const password = String(body.password || "");
+
+        if (!email || !password) {
+          return json({ error: "Enter both your email address and password." }, 400);
+        }
 
         const user = await env.DB.prepare(`
           SELECT id, full_name, email, password_hash, status
@@ -401,19 +420,20 @@ export default {
           !user.password_hash ||
           !(await verifyPassword(password, user.password_hash))
         ) {
-          return response({ error: "Invalid email or password." }, 401);
+          return json({
+            error: "The email or password is incorrect. Check both and try again."
+          }, 401);
         }
 
         if (user.status !== "active") {
-          return response({ error: "This account is not active." }, 403);
+          return json({
+            error: "This account is not active. Please contact ZAVO support."
+          }, 403);
         }
 
         const session = await createSession(env.DB, user.id);
 
-        return response({
-          success: true,
-          ...session
-        });
+        return json({ success: true, ...session });
       }
 
       if (path === "/api/auth/google" && request.method === "POST") {
@@ -422,14 +442,14 @@ export default {
         try {
           body = await request.json();
         } catch {
-          return response({ error: "Please send valid JSON." }, 400);
+          return json({ error: "Google sign-in could not read the request. Please try again." }, 400);
         }
 
         const credential = String(body.credential || "");
 
         if (!credential || credential.length > 10000) {
-          return response({
-            error: "Missing or invalid Google credential."
+          return json({
+            error: "Google did not provide a valid sign-in credential. Try again."
           }, 400);
         }
 
@@ -440,16 +460,16 @@ export default {
         } catch (error) {
           console.error("Google verification failed:", error?.message || "Unknown error");
 
-          return response({
-            error: "Google sign-in could not be verified. Please try again."
+          return json({
+            error: "Google could not verify this sign-in. Check your connection and try again."
           }, 401);
         }
 
         const email = String(claims.email).trim().toLowerCase();
         const googleSub = String(claims.sub);
-        const fullName = String(
-          claims.name || email.split("@")[0]
-        ).trim().slice(0, 100);
+        const fullName = String(claims.name || email.split("@")[0])
+          .trim()
+          .slice(0, 100);
 
         let account = await env.DB.prepare(`
           SELECT u.id, u.full_name, u.email, u.status
@@ -459,8 +479,8 @@ export default {
         `).bind(googleSub).first();
 
         if (account && account.email.toLowerCase() !== email) {
-          return response({
-            error: "The Google account email has changed. Please contact support."
+          return json({
+            error: "The Google account email has changed. Please contact ZAVO support."
           }, 403);
         }
 
@@ -472,59 +492,88 @@ export default {
           `).bind(email).first();
 
           if (existing) {
-            // Do not silently link an existing account.
-            return response({
-              error: "An account with this email already exists. Log in using that account first."
-            }, 409);
+            // Google has verified this exact email. Link this Google identity
+            // to the existing account rather than creating a duplicate.
+            const linked = await env.DB.prepare(`
+              SELECT google_sub FROM google_accounts WHERE user_id = ?
+            `).bind(existing.id).first();
+
+            if (linked && linked.google_sub !== googleSub) {
+              return json({
+                error: "A different Google account is already linked to this ZAVO account."
+              }, 409);
+            }
+
+            if (!linked) {
+              try {
+                await env.DB.prepare(`
+                  INSERT INTO google_accounts (google_sub, user_id, email)
+                  VALUES (?, ?, ?)
+                `).bind(googleSub, existing.id, email).run();
+              } catch (error) {
+                console.error("Google account linking failed:", error?.message || "Unknown error");
+                return json({
+                  error: "We couldn't link Google to this account. Please log in with your email and password."
+                }, 409);
+              }
+            }
+
+            account = existing;
+          } else {
+            const id = crypto.randomUUID();
+
+            try {
+              await env.DB.batch([
+                env.DB.prepare(`
+                  INSERT INTO users (id, full_name, email, password_hash, status)
+                  VALUES (?, ?, ?, NULL, 'active')
+                `).bind(id, fullName || email, email),
+                env.DB.prepare(`
+                  INSERT INTO user_roles (user_id, role)
+                  VALUES (?, 'customer')
+                `).bind(id),
+                env.DB.prepare(`
+                  INSERT INTO google_accounts (google_sub, user_id, email)
+                  VALUES (?, ?, ?)
+                `).bind(googleSub, id, email)
+              ]);
+            } catch (error) {
+              console.error("Google account creation failed:", error?.message || "Unknown error");
+              return json({
+                error: "We couldn't create your Google account just now. Please try again."
+              }, 409);
+            }
+
+            account = {
+              id,
+              full_name: fullName || email,
+              email,
+              status: "active"
+            };
           }
-
-          const id = crypto.randomUUID();
-
-          await env.DB.prepare(`
-            INSERT INTO users (id, full_name, email, password_hash, status)
-            VALUES (?, ?, ?, NULL, 'active')
-          `).bind(id, fullName || email, email).run();
-
-          await env.DB.prepare(`
-            INSERT INTO user_roles (user_id, role)
-            VALUES (?, 'customer')
-          `).bind(id).run();
-
-          await env.DB.prepare(`
-            INSERT INTO google_accounts (google_sub, user_id, email)
-            VALUES (?, ?, ?)
-          `).bind(googleSub, id, email).run();
-
-          account = {
-            id,
-            full_name: fullName || email,
-            email,
-            status: "active"
-          };
         }
 
         if (account.status !== "active") {
-          return response({
-            error: "This account is not active."
+          return json({
+            error: "This account is not active. Please contact ZAVO support."
           }, 403);
         }
 
         const session = await createSession(env.DB, account.id);
 
-        return response({
-          success: true,
-          ...session
-        });
+        return json({ success: true, ...session });
       }
 
       if (path === "/api/auth/me" && request.method === "GET") {
         const user = await getSession(request, env.DB);
 
         if (!user) {
-          return response({ error: "Please log in." }, 401);
+          return json({
+            error: "Your session has expired. Please log in again."
+          }, 401);
         }
 
-        return response({ success: true, user });
+        return json({ success: true, user });
       }
 
       if (path === "/api/auth/logout" && request.method === "POST") {
@@ -540,10 +589,7 @@ export default {
           }
         }
 
-        return response({
-          success: true,
-          message: "Logged out."
-        });
+        return json({ success: true, message: "You have logged out." });
       }
 
       if (path === "/api/products" && request.method === "GET") {
@@ -605,19 +651,19 @@ export default {
           return item;
         });
 
-        return response({
+        return json({
           success: true,
           count: output.length,
           products: output
         });
       }
 
-      return response({ error: "Route not found." }, 404);
+      return json({ error: "This ZAVO API route was not found." }, 404);
     } catch (error) {
       console.error("ZAVO API error:", error?.message || "Unknown error");
 
-      return response({
-        error: "The request could not be completed. Check the Worker logs."
+      return json({
+        error: "ZAVO's server encountered a problem. Please try again shortly."
       }, 500);
     }
   }
