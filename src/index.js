@@ -1,3 +1,4 @@
+
 const ALLOWED_ORIGINS = new Set([
   "https://zavo-store.pages.dev",
   "https://zavo-ke.github.io"
@@ -237,6 +238,10 @@ async function createSession(db, userId) {
     SELECT id, full_name, email FROM users WHERE id = ?
   `).bind(userId).first();
 
+  if (!user) {
+    throw new Error("Could not load the user account.");
+  }
+
   return {
     token,
     expires_at: expiresAt,
@@ -289,9 +294,7 @@ async function requireAdmin(request, db) {
     };
   }
 
-  const isAdmin = user.roles.includes("admin");
-
-  if (!isAdmin) {
+  if (!user.roles.includes("admin")) {
     return {
       ok: false,
       status: 403,
@@ -305,9 +308,11 @@ async function requireAdmin(request, db) {
 async function readBody(request) {
   try {
     const body = await request.json();
+
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return null;
     }
+
     return body;
   } catch {
     return null;
@@ -323,39 +328,38 @@ function makeSlug(value) {
     .slice(0, 100);
 }
 
-async function ensureAuditTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS audit_logs (
-      id TEXT PRIMARY KEY,
-      actor_user_id TEXT,
-      action TEXT NOT NULL,
-      target_type TEXT NOT NULL,
-      target_id TEXT,
-      details TEXT NOT NULL DEFAULT '{}',
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-}
-
-async function logAdminAction(db, adminId, action, targetType, targetId, details = {}) {
+/*
+ * IMPORTANT:
+ * Do not create or alter audit_logs here.
+ * The existing ZAVO D1 table uses entity_type, entity_id and details_json.
+ */
+async function logAdminAction(
+  db,
+  adminId,
+  action,
+  entityType,
+  entityId,
+  details = {}
+) {
   try {
-    await ensureAuditTable(db);
-
     await db.prepare(`
       INSERT INTO audit_logs
-        (id, actor_user_id, action, target_type, target_id, details)
+        (id, actor_user_id, action, entity_type, entity_id, details_json)
       VALUES (?, ?, ?, ?, ?, ?)
     `).bind(
       crypto.randomUUID(),
       adminId,
       action,
-      targetType,
-      targetId || null,
+      entityType,
+      entityId || null,
       JSON.stringify(details)
     ).run();
   } catch (error) {
-    // Do not hide a successful main action because logging failed.
-    console.error("Admin audit logging failed:", error?.message || "Unknown error");
+    // Audit failure must not undo an already completed main action.
+    console.error(
+      "Admin audit logging failed:",
+      error?.message || "Unknown error"
+    );
   }
 }
 
@@ -381,10 +385,14 @@ export default {
 
     if (request.method === "OPTIONS") {
       if (origin && !ALLOWED_ORIGINS.has(origin)) {
-        return new Response(null, { status: 403, headers: BASE_HEADERS });
+        return new Response(null, {
+          status: 403,
+          headers: BASE_HEADERS
+        });
       }
 
       const headers = new Headers(BASE_HEADERS);
+
       if (origin && ALLOWED_ORIGINS.has(origin)) {
         headers.set("Access-Control-Allow-Origin", origin);
       }
@@ -420,15 +428,20 @@ export default {
         const body = await readBody(request);
 
         if (!body) {
-          return json({ error: "Please check the form and submit it again." }, 400);
+          return json({
+            error: "Please check the form and submit it again."
+          }, 400);
         }
 
         const fullName = String(body.full_name || "").trim();
         const email = String(body.email || "").trim().toLowerCase();
         const password = String(body.password || "");
+        const confirmPassword = String(body.confirm_password || "");
 
         if (fullName.length < 2 || fullName.length > 100) {
-          return json({ error: "Enter your full name using 2–100 characters." }, 400);
+          return json({
+            error: "Enter your full name using 2–100 characters."
+          }, 400);
         }
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
@@ -436,7 +449,18 @@ export default {
         }
 
         if (password.length < 12 || password.length > 128) {
-          return json({ error: "Your password must contain 12–128 characters." }, 400);
+          return json({
+            error: "Your password must contain 12–128 characters."
+          }, 400);
+        }
+
+        /*
+         * If the storefront sends confirm_password, verify it.
+         * This does not replace email verification, which requires
+         * a configured email delivery service and verification tokens.
+         */
+        if (confirmPassword && password !== confirmPassword) {
+          return json({ error: "The passwords do not match." }, 400);
         }
 
         const existing = await db.prepare(
@@ -476,24 +500,31 @@ export default {
         const body = await readBody(request);
 
         if (!body) {
-          return json({ error: "Please check your email and password fields." }, 400);
+          return json({
+            error: "Please check your email and password fields."
+          }, 400);
         }
 
         const email = String(body.email || "").trim().toLowerCase();
         const password = String(body.password || "");
 
         if (!email || !password) {
-          return json({ error: "Enter both your email address and password." }, 400);
+          return json({
+            error: "Enter both your email address and password."
+          }, 400);
         }
 
         const user = await db.prepare(`
           SELECT id, full_name, email, password_hash, status
-          FROM users WHERE lower(email) = ?
+          FROM users
+          WHERE lower(email) = ?
         `).bind(email).first();
 
         if (!user || !user.password_hash ||
             !(await verifyPassword(password, user.password_hash))) {
-          return json({ error: "The email or password is incorrect." }, 401);
+          return json({
+            error: "The email or password is incorrect."
+          }, 401);
         }
 
         if (user.status !== "active") {
@@ -516,7 +547,9 @@ export default {
         const credential = String(body?.credential || "");
 
         if (!credential || credential.length > 10000) {
-          return json({ error: "Google did not provide a valid credential." }, 400);
+          return json({
+            error: "Google did not provide a valid credential."
+          }, 400);
         }
 
         let claims;
@@ -524,7 +557,11 @@ export default {
         try {
           claims = await verifyGoogleCredential(credential);
         } catch (error) {
-          console.error("Google verification failed:", error?.message || "Unknown error");
+          console.error(
+            "Google verification failed:",
+            error?.message || "Unknown error"
+          );
+
           return json({
             error: "Google could not verify this sign-in. Please try again."
           }, 401);
@@ -533,7 +570,8 @@ export default {
         const email = String(claims.email).trim().toLowerCase();
         const googleSub = String(claims.sub);
         const fullName = String(claims.name || email.split("@")[0])
-          .trim().slice(0, 100);
+          .trim()
+          .slice(0, 100);
 
         let account = await db.prepare(`
           SELECT u.id, u.full_name, u.email, u.status
@@ -551,7 +589,8 @@ export default {
         if (!account) {
           const existing = await db.prepare(`
             SELECT id, full_name, email, status
-            FROM users WHERE lower(email) = ?
+            FROM users
+            WHERE lower(email) = ?
           `).bind(email).first();
 
           if (existing) {
@@ -619,7 +658,9 @@ export default {
         const user = await getSession(request, db);
 
         if (!user) {
-          return json({ error: "Your session has expired. Please log in again." }, 401);
+          return json({
+            error: "Your session has expired. Please log in again."
+          }, 401);
         }
 
         return json({ success: true, user });
@@ -638,14 +679,16 @@ export default {
           }
         }
 
-        return json({ success: true, message: "You have logged out." });
+        return json({
+          success: true,
+          message: "You have logged out."
+        });
       }
 
       // =========================================================
       // ADMIN: LIST PRODUCTS
       // =========================================================
-      if (path === "/api/admin/products" &&
-          request.method === "GET") {
+      if (path === "/api/admin/products" && request.method === "GET") {
         const admin = await getAdmin(request, db, json);
         if (admin.response) return admin.response;
 
@@ -671,8 +714,7 @@ export default {
       // =========================================================
       // ADMIN: CREATE PRODUCT
       // =========================================================
-      if (path === "/api/admin/products" &&
-          request.method === "POST") {
+      if (path === "/api/admin/products" && request.method === "POST") {
         const admin = await getAdmin(request, db, json);
         if (admin.response) return admin.response;
 
@@ -692,8 +734,11 @@ export default {
         const returnPolicy = String(body.return_policy || "").trim();
         const sku = String(body.sku || "").trim();
 
-        if (!title || title.length > 200 || !category || category.length > 100) {
-          return json({ error: "Enter a product title and category." }, 400);
+        if (!title || title.length > 200 ||
+            !category || category.length > 100) {
+          return json({
+            error: "Enter a product title and category."
+          }, 400);
         }
 
         if (!Number.isSafeInteger(price) || price < 0 ||
@@ -705,25 +750,37 @@ export default {
         }
 
         if (!["KES", "USD"].includes(currency)) {
-          return json({ error: "Supported currencies are KES and USD." }, 400);
+          return json({
+            error: "Supported currencies are KES and USD."
+          }, 400);
         }
 
         if (!["draft", "published"].includes(status)) {
-          return json({ error: "Product status must be draft or published." }, 400);
+          return json({
+            error: "Product status must be draft or published."
+          }, 400);
         }
 
         let vendor;
 
         if (vendorId) {
           vendor = await db.prepare(`
-            SELECT id FROM vendor_profiles
-            WHERE id = ? AND status = 'active'
+            SELECT v.id
+            FROM vendor_profiles v
+            JOIN users u ON u.id = v.user_id
+            WHERE v.id = ?
+              AND v.status = 'active'
+              AND u.status = 'active'
           `).bind(vendorId).first();
         } else {
           vendor = await db.prepare(`
-            SELECT id FROM vendor_profiles
-            WHERE status = 'active'
-            ORDER BY created_at ASC LIMIT 1
+            SELECT v.id
+            FROM vendor_profiles v
+            JOIN users u ON u.id = v.user_id
+            WHERE v.status = 'active'
+              AND u.status = 'active'
+            ORDER BY v.created_at ASC
+            LIMIT 1
           `).first();
         }
 
@@ -749,7 +806,8 @@ export default {
         ).run();
 
         await logAdminAction(
-          db, admin.user.id, "product_created", "product", id, { title, status }
+          db, admin.user.id, "product_created", "product", id,
+          { title, status }
         );
 
         return json({
@@ -762,8 +820,7 @@ export default {
       // =========================================================
       // ADMIN: EDIT PRODUCT
       // =========================================================
-      if (path === "/api/admin/products/update" &&
-          request.method === "POST") {
+      if (path === "/api/admin/products/update" && request.method === "POST") {
         const admin = await getAdmin(request, db, json);
         if (admin.response) return admin.response;
 
@@ -782,22 +839,29 @@ export default {
         const returnPolicy = String(body.return_policy || "").trim();
         const sku = String(body.sku || "").trim();
 
-        if (!id || !title || title.length > 200 || !category) {
-          return json({ error: "Product ID, title and category are required." }, 400);
+        if (!id || !title || title.length > 200 ||
+            !category || category.length > 100) {
+          return json({
+            error: "Product ID, title and category are required."
+          }, 400);
         }
 
         if (!Number.isSafeInteger(price) || price < 0 ||
             !Number.isSafeInteger(cost) || cost < 0 ||
             !Number.isSafeInteger(stock) || stock < 0 ||
             !["KES", "USD"].includes(currency)) {
-          return json({ error: "Check the product price, cost, stock and currency." }, 400);
+          return json({
+            error: "Check the product price, cost, stock and currency."
+          }, 400);
         }
 
         const existing = await db.prepare(
           "SELECT id FROM products WHERE id = ?"
         ).bind(id).first();
 
-        if (!existing) return json({ error: "Product not found." }, 404);
+        if (!existing) {
+          return json({ error: "Product not found." }, 404);
+        }
 
         await db.prepare(`
           UPDATE products
@@ -814,14 +878,16 @@ export default {
           db, admin.user.id, "product_updated", "product", id, { title }
         );
 
-        return json({ success: true, message: "Product updated." });
+        return json({
+          success: true,
+          message: "Product updated."
+        });
       }
 
       // =========================================================
       // ADMIN: PUBLISH OR UNPUBLISH PRODUCT
       // =========================================================
-      if (path === "/api/admin/products/status" &&
-          request.method === "POST") {
+      if (path === "/api/admin/products/status" && request.method === "POST") {
         const admin = await getAdmin(request, db, json);
         if (admin.response) return admin.response;
 
@@ -835,50 +901,89 @@ export default {
           }, 400);
         }
 
-        const product = await db.prepare(
-          "SELECT id FROM products WHERE id = ?"
-        ).bind(id).first();
+        const product = await db.prepare(`
+          SELECT p.id, p.vendor_id, v.status AS vendor_status,
+                 u.status AS account_status
+          FROM products p
+          JOIN vendor_profiles v ON v.id = p.vendor_id
+          JOIN users u ON u.id = v.user_id
+          WHERE p.id = ?
+        `).bind(id).first();
 
-        if (!product) return json({ error: "Product not found." }, 404);
+        if (!product) {
+          return json({ error: "Product not found." }, 404);
+        }
+
+        if (
+          status === "published" &&
+          (product.vendor_status !== "active" ||
+           product.account_status !== "active")
+        ) {
+          return json({
+            error: "This product cannot be published until its vendor and user account are active."
+          }, 409);
+        }
 
         await db.prepare(
           "UPDATE products SET status = ? WHERE id = ?"
         ).bind(status, id).run();
 
         await logAdminAction(
-          db, admin.user.id, "product_status_changed", "product", id, { status }
+          db, admin.user.id, "product_status_changed", "product", id,
+          { status }
         );
 
-        return json({ success: true, message: `Product status changed to ${status}.` });
+        return json({
+          success: true,
+          message: `Product status changed to ${status}.`
+        });
       }
 
       // =========================================================
-      // ADMIN: DELETE PRODUCT AND ITS MEDIA RECORDS
+      // ADMIN: DELETE PRODUCT SAFELY
       // =========================================================
-      if (path === "/api/admin/products/delete" &&
-          request.method === "POST") {
+      if (path === "/api/admin/products/delete" && request.method === "POST") {
         const admin = await getAdmin(request, db, json);
         if (admin.response) return admin.response;
 
         const body = await readBody(request);
         const id = String(body?.id || "").trim();
 
-        if (!id) return json({ error: "Product ID is required." }, 400);
+        if (!id) {
+          return json({ error: "Product ID is required." }, 400);
+        }
 
         const product = await db.prepare(
           "SELECT id, title FROM products WHERE id = ?"
         ).bind(id).first();
 
-        if (!product) return json({ error: "Product not found." }, 404);
+        if (!product) {
+          return json({ error: "Product not found." }, 404);
+        }
 
-        // Delete associated media records first to avoid foreign-key conflicts.
-        await db.prepare(
-          "DELETE FROM product_media WHERE product_id = ?"
-        ).bind(id).run();
+        const orderHistory = await db.prepare(
+          "SELECT id FROM order_items WHERE product_id = ? LIMIT 1"
+        ).bind(id).first();
 
-        await db.prepare(
-          "DELETE FROM products WHERE id = ?"
-        ).bind(id).run();
+        if (orderHistory) {
+          return json({
+            success: false,
+            error: "This product is linked to order history and cannot be deleted. Change its status to draft to remove it from the public catalogue."
+          }, 409);
+        }
+
+        /*
+         * Both operations are batched. The order-history check above
+         * protects records referenced by existing order_items.
+         */
+        await db.batch([
+          db.prepare(
+            "DELETE FROM product_media WHERE product_id = ?"
+          ).bind(id),
+          db.prepare(
+            "DELETE FROM products WHERE id = ?"
+          ).bind(id)
+        ]);
 
         await logAdminAction(
           db, admin.user.id, "product_deleted", "product", id,
@@ -894,8 +999,7 @@ export default {
       // =========================================================
       // ADMIN: LIST VENDORS
       // =========================================================
-      if (path === "/api/admin/vendors" &&
-          request.method === "GET") {
+      if (path === "/api/admin/vendors" && request.method === "GET") {
         const admin = await getAdmin(request, db, json);
         if (admin.response) return admin.response;
 
@@ -924,10 +1028,9 @@ export default {
       }
 
       // =========================================================
-      // ADMIN: APPROVE, WARN, SUSPEND, RESTORE OR BAN VENDOR
+      // ADMIN: APPROVE, WARN, SUSPEND OR RESTORE VENDOR
       // =========================================================
-      if (path === "/api/admin/vendors/action" &&
-          request.method === "POST") {
+      if (path === "/api/admin/vendors/action" && request.method === "POST") {
         const admin = await getAdmin(request, db, json);
         if (admin.response) return admin.response;
 
@@ -937,33 +1040,42 @@ export default {
         const reason = String(body?.reason || "").trim().slice(0, 1000);
 
         const allowedActions = [
-          "approve", "warn", "suspend", "restore", "ban"
+          "approve", "warn", "suspend", "restore"
         ];
 
         if (!vendorId || !allowedActions.includes(action)) {
           return json({
-            error: "Provide a vendor ID and action: approve, warn, suspend, restore or ban."
+            error: "Provide a vendor ID and action: approve, warn, suspend or restore. Banning is not supported by the current database status rules; use suspension instead."
           }, 400);
         }
 
-        if (["warn", "suspend", "ban"].includes(action) && !reason) {
+        if (["warn", "suspend"].includes(action) && !reason) {
           return json({
             error: "Enter a reason so the decision can be recorded."
           }, 400);
         }
 
         const vendor = await db.prepare(`
-          SELECT v.id, v.user_id, v.store_name, v.status, u.status AS account_status
+          SELECT v.id, v.user_id, v.store_name, v.status,
+                 u.status AS account_status
           FROM vendor_profiles v
           LEFT JOIN users u ON u.id = v.user_id
           WHERE v.id = ?
         `).bind(vendorId).first();
 
-        if (!vendor) return json({ error: "Vendor account not found." }, 404);
+        if (!vendor) {
+          return json({ error: "Vendor account not found." }, 404);
+        }
+
+        if (!vendor.user_id) {
+          return json({
+            error: "This vendor has no linked user account and cannot be changed."
+          }, 409);
+        }
 
         if (vendor.user_id === admin.user.id && action !== "warn") {
           return json({
-            error: "You cannot suspend, ban or change your own administrator account through vendor controls."
+            error: "You cannot suspend or change your own administrator account through vendor controls."
           }, 403);
         }
 
@@ -1000,28 +1112,12 @@ export default {
         }
 
         if (action === "restore") {
-          // Restoring re-enables the account and listing visibility.
-          // Use this only after the reason for suspension has been resolved.
           await db.batch([
             db.prepare(`
               UPDATE vendor_profiles SET status = 'active' WHERE id = ?
             `).bind(vendorId),
             db.prepare(`
               UPDATE users SET status = 'active' WHERE id = ?
-            `).bind(vendor.user_id)
-          ]);
-        }
-
-        if (action === "ban") {
-          await db.batch([
-            db.prepare(`
-              UPDATE vendor_profiles SET status = 'banned' WHERE id = ?
-            `).bind(vendorId),
-            db.prepare(`
-              UPDATE users SET status = 'banned' WHERE id = ?
-            `).bind(vendor.user_id),
-            db.prepare(`
-              DELETE FROM auth_sessions WHERE user_id = ?
             `).bind(vendor.user_id)
           ]);
         }
@@ -1041,9 +1137,8 @@ export default {
         const messages = {
           approve: "Vendor approved. The vendor account is active.",
           warn: "Warning recorded in the administrator action log.",
-          suspend: "Vendor suspended. Their account sessions have been revoked and their listings are hidden.",
-          restore: "Vendor account restored.",
-          ban: "Vendor banned. Their account sessions have been revoked and their listings are hidden."
+          suspend: "Vendor suspended. Their sessions have been revoked and their listings are hidden.",
+          restore: "Vendor account restored."
         };
 
         return json({
@@ -1130,7 +1225,10 @@ export default {
       }, 404);
 
     } catch (error) {
-      console.error("ZAVO API error:", error?.message || "Unknown error");
+      console.error(
+        "ZAVO API error:",
+        error?.message || "Unknown error"
+      );
 
       return json({
         success: false,
